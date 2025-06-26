@@ -1,0 +1,962 @@
+[
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor1",
+      "email": "juan.su\u00e1rez@example.com",
+      "first_name": "Juan",
+      "last_name": "Su\u00e1rez",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "phone": "+8801750000001",
+      "dob": "1974-06-10",
+      "about": "MBBS from Quito Medical College. 19 years of experience in Gynecologist.",
+      "specialization": "Ophthalmologist",
+      "gender": "male",
+      "address": "House 49, Road 15, Block C, santa rosa",
+      "city": "Machala",
+      "state": "Azuay",
+      "postal_code": "2404",
+      "country": "Ecuador",
+      "price_per_consultation": 1764,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor2",
+      "email": "paola.jones@example.com",
+      "first_name": "Paola",
+      "last_name": "Jones",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "phone": "+8801750000002",
+      "dob": "1964-04-10",
+      "about": "MBBS from Quito Medical College. 13 years of experience in Neurologist.",
+      "specialization": "Cardiologist",
+      "gender": "female",
+      "address": "House 76, Road 15, Block C, san pedro",
+      "city": "Santo Domingo",
+      "state": "Azuay",
+      "postal_code": "7595",
+      "country": "Ecuador",
+      "price_per_consultation": 1043,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor3",
+      "email": "daniel.l\u00f3pez@example.com",
+      "first_name": "Daniel",
+      "last_name": "L\u00f3pez",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 3,
+    "fields": {
+      "user": 3,
+      "phone": "+8801750000003",
+      "dob": "1968-11-14",
+      "about": "MBBS from Guayaquil Medical College. 19 years of experience in Gynecologist.",
+      "specialization": "Psychiatrist",
+      "gender": "male",
+      "address": "House 41, Road 9, Block D, san pedro",
+      "city": "Santo Domingo",
+      "state": "Santo Domingo de los Ts\u00e1chilas",
+      "postal_code": "6042",
+      "country": "Ecuador",
+      "price_per_consultation": 1588,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor4",
+      "email": "mateo.s\u00e1nchez@example.com",
+      "first_name": "Mateo",
+      "last_name": "S\u00e1nchez",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 4,
+    "fields": {
+      "user": 4,
+      "phone": "+8801750000004",
+      "dob": "1962-10-01",
+      "about": "MBBS from Guayaquil Medical College. 17 years of experience in Orthopedic Surgeon.",
+      "specialization": "Orthopedic Surgeon",
+      "gender": "male",
+      "address": "House 39, Road 15, Block A, san pedro",
+      "city": "Guayaquil",
+      "state": "Santo Domingo de los Ts\u00e1chilas",
+      "postal_code": "4157",
+      "country": "Ecuador",
+      "price_per_consultation": 933,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor5",
+      "email": "jos\u00e9.reyes@example.com",
+      "first_name": "Jos\u00e9",
+      "last_name": "Reyes",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 5,
+    "fields": {
+      "user": 5,
+      "phone": "+8801750000005",
+      "dob": "1976-09-21",
+      "about": "MBBS from Cuenca Medical College. 7 years of experience in Dentist.",
+      "specialization": "Cardiologist",
+      "gender": "male",
+      "address": "House 13, Road 1, Block B, San jose",
+      "city": "Santo Domingo",
+      "state": "Santo Domingo de los Ts\u00e1chilas",
+      "postal_code": "9228",
+      "country": "Ecuador",
+      "price_per_consultation": 803,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor6",
+      "email": "paola.johnson@example.com",
+      "first_name": "Paola",
+      "last_name": "Johnson",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 6,
+    "fields": {
+      "user": 6,
+      "phone": "+8801750000006",
+      "dob": "1961-06-03",
+      "about": "MBBS from Quito Medical College. 14 years of experience in ENT Specialist.",
+      "specialization": "Gynecologist",
+      "gender": "female",
+      "address": "House 7, Road 2, Block E, del Valle",
+      "city": "Ambato",
+      "state": "Azuay",
+      "postal_code": "8926",
+      "country": "Ecuador",
+      "price_per_consultation": 1558,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor7",
+      "email": "sebasti\u00e1n.garc\u00eda@example.com",
+      "first_name": "Sebasti\u00e1n",
+      "last_name": "Garc\u00eda",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 7,
+    "fields": {
+      "user": 7,
+      "phone": "+8801750000007",
+      "dob": "1963-08-26",
+      "about": "MBBS from Cuenca Medical College. 11 years of experience in ENT Specialist.",
+      "specialization": "Orthopedic Surgeon",
+      "gender": "male",
+      "address": "House 95, Road 5, Block C, santa rosa",
+      "city": "Riobamba",
+      "state": "Azuay",
+      "postal_code": "6100",
+      "country": "Ecuador",
+      "price_per_consultation": 1000,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor8",
+      "email": "diego.mora@example.com",
+      "first_name": "Diego",
+      "last_name": "Mora",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 8,
+    "fields": {
+      "user": 8,
+      "phone": "+8801750000008",
+      "dob": "1971-08-05",
+      "about": "MBBS from Guayaquil Medical College. 7 years of experience in Gynecologist.",
+      "specialization": "Orthopedic Surgeon",
+      "gender": "male",
+      "address": "House 86, Road 9, Block E, del Valle",
+      "city": "Manta",
+      "state": "Guayas",
+      "postal_code": "4981",
+      "country": "Ecuador",
+      "price_per_consultation": 1228,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor9",
+      "email": "daniel.mora@example.com",
+      "first_name": "Daniel",
+      "last_name": "Mora",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 9,
+    "fields": {
+      "user": 9,
+      "phone": "+8801750000009",
+      "dob": "1986-08-04",
+      "about": "MBBS from Ambato Medical College. 19 years of experience in Dermatologist.",
+      "specialization": "Psychiatrist",
+      "gender": "male",
+      "address": "House 9, Road 3, Block B, del R\u00edo",
+      "city": "Santo Domingo",
+      "state": "Loja",
+      "postal_code": "6823",
+      "country": "Ecuador",
+      "price_per_consultation": 1787,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor10",
+      "email": "fernando.andrade@example.com",
+      "first_name": "Fernando",
+      "last_name": "Andrade",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 10,
+    "fields": {
+      "user": 10,
+      "phone": "+8801750000010",
+      "dob": "1990-01-03",
+      "about": "MBBS from Ambato Medical College. 15 years of experience in Pediatrician.",
+      "specialization": "Pediatrician",
+      "gender": "male",
+      "address": "House 38, Road 12, Block D, santa rosa",
+      "city": "Esmeraldas",
+      "state": "Loja",
+      "postal_code": "1819",
+      "country": "Ecuador",
+      "price_per_consultation": 1236,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor11",
+      "email": "jos\u00e9.cabrera@example.com",
+      "first_name": "Jos\u00e9",
+      "last_name": "Cabrera",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 11,
+    "fields": {
+      "user": 11,
+      "phone": "+8801750000011",
+      "dob": "1965-06-07",
+      "about": "MBBS from Ambato Medical College. 18 years of experience in Neurologist.",
+      "specialization": "Dentist",
+      "gender": "male",
+      "address": "House 84, Road 2, Block E, san pedro",
+      "city": "Ibarra",
+      "state": "Guayas",
+      "postal_code": "6392",
+      "country": "Ecuador",
+      "price_per_consultation": 1640,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor12",
+      "email": "fernando.mendoza@example.com",
+      "first_name": "Fernando",
+      "last_name": "Mendoza",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 12,
+    "fields": {
+      "user": 12,
+      "phone": "+8801750000012",
+      "dob": "1982-12-19",
+      "about": "MBBS from Quito Medical College. 16 years of experience in Pediatrician.",
+      "specialization": "Dermatologist",
+      "gender": "male",
+      "address": "House 93, Road 14, Block D, santa rosa",
+      "city": "Riobamba",
+      "state": "Santo Domingo de los Ts\u00e1chilas",
+      "postal_code": "9912",
+      "country": "Ecuador",
+      "price_per_consultation": 1617,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor13",
+      "email": "alejandro.cabrera@example.com",
+      "first_name": "Alejandro",
+      "last_name": "Cabrera",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 13,
+    "fields": {
+      "user": 13,
+      "phone": "+8801750000013",
+      "dob": "1981-06-20",
+      "about": "MBBS from Cuenca Medical College. 11 years of experience in Orthopedic Surgeon.",
+      "specialization": "Pediatrician",
+      "gender": "male",
+      "address": "House 76, Road 8, Block C, del R\u00edo",
+      "city": "Ibarra",
+      "state": "Pichincha",
+      "postal_code": "3688",
+      "country": "Ecuador",
+      "price_per_consultation": 852,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor14",
+      "email": "fernanda.rodriguez@example.com",
+      "first_name": "Fernanda",
+      "last_name": "Rodriguez",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 14,
+    "fields": {
+      "user": 14,
+      "phone": "+8801750000014",
+      "dob": "1981-01-23",
+      "about": "MBBS from Cuenca Medical College. 8 years of experience in Dentist.",
+      "specialization": "Gynecologist",
+      "gender": "female",
+      "address": "House 51, Road 3, Block A, del Valle",
+      "city": "Cuenca",
+      "state": "Guayas",
+      "postal_code": "5943",
+      "country": "Ecuador",
+      "price_per_consultation": 580,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "doctor15",
+      "email": "ver\u00f3nica.martinez@example.com",
+      "first_name": "Ver\u00f3nica",
+      "last_name": "Martinez",
+      "role": "doctor",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 15,
+    "fields": {
+      "user": 15,
+      "phone": "+8801750000015",
+      "dob": "1980-07-24",
+      "about": "MBBS from Guayaquil Medical College. 10 years of experience in Dermatologist.",
+      "specialization": "Ophthalmologist",
+      "gender": "female",
+      "address": "House 16, Road 8, Block A, del R\u00edo",
+      "city": "Guayaquil",
+      "state": "Imbabura",
+      "postal_code": "7589",
+      "country": "Ecuador",
+      "price_per_consultation": 745,
+      "is_available": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 16,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient1",
+      "email": "alejandro.torres@example.com",
+      "first_name": "Alejandro",
+      "last_name": "Torres",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 16,
+    "fields": {
+      "user": 16,
+      "phone": "+8801850000001",
+      "dob": "1993-06-05",
+      "gender": "male",
+      "address": "Flat 5A, House 22, Road 6, Dhanmondi",
+      "city": "Manta",
+      "state": "Loja",
+      "postal_code": "1334",
+      "country": "Bangladesh",
+      "blood_group": "O-",
+      "allergies": "Dust Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 17,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient2",
+      "email": "daniel.garc\u00eda@example.com",
+      "first_name": "Daniel",
+      "last_name": "Garc\u00eda",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 17,
+    "fields": {
+      "user": 17,
+      "phone": "+8801850000002",
+      "dob": "1981-02-17",
+      "gender": "male",
+      "address": "Flat 8A, House 11, Road 13, Dhanmondi",
+      "city": "Machala",
+      "state": "Loja",
+      "postal_code": "8338",
+      "country": "Bangladesh",
+      "blood_group": "B+",
+      "allergies": "None",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 18,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient3",
+      "email": "camila.hernandez@example.com",
+      "first_name": "Camila",
+      "last_name": "Hernandez",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 18,
+    "fields": {
+      "user": 18,
+      "phone": "+8801850000003",
+      "dob": "1995-10-12",
+      "gender": "female",
+      "address": "Flat 1A, House 57, Road 1, Gulshan",
+      "city": "Guayaquil",
+      "state": "Chimborazo",
+      "postal_code": "1852",
+      "country": "Bangladesh",
+      "blood_group": "O+",
+      "allergies": "Food Allergy",
+      "medical_conditions": "Diabetes"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 19,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient4",
+      "email": "juan.garc\u00eda@example.com",
+      "first_name": "Juan",
+      "last_name": "Garc\u00eda",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 19,
+    "fields": {
+      "user": 19,
+      "phone": "+8801850000004",
+      "dob": "1985-07-14",
+      "gender": "male",
+      "address": "Flat 3A, House 64, Road 6, Dhanmondi",
+      "city": "Quito",
+      "state": "Chimborazo",
+      "postal_code": "5584",
+      "country": "Bangladesh",
+      "blood_group": "AB+",
+      "allergies": "None",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 20,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient5",
+      "email": "david.su\u00e1rez@example.com",
+      "first_name": "David",
+      "last_name": "Su\u00e1rez",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 20,
+    "fields": {
+      "user": 20,
+      "phone": "+8801850000005",
+      "dob": "1971-08-14",
+      "gender": "male",
+      "address": "Flat 11A, House 59, Road 8, Dhanmondi",
+      "city": "Riobamba",
+      "state": "Imbabura",
+      "postal_code": "4626",
+      "country": "Bangladesh",
+      "blood_group": "A-",
+      "allergies": "None",
+      "medical_conditions": "Asthma"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 21,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient6",
+      "email": "jos\u00e9.vera@example.com",
+      "first_name": "Jos\u00e9",
+      "last_name": "Vera",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 21,
+    "fields": {
+      "user": 21,
+      "phone": "+8801850000006",
+      "dob": "1986-07-13",
+      "gender": "male",
+      "address": "Flat 12A, House 18, Road 15, Gulshan",
+      "city": "Guayaquil",
+      "state": "Azuay",
+      "postal_code": "3276",
+      "country": "Bangladesh",
+      "blood_group": "O-",
+      "allergies": "Food Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 22,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient7",
+      "email": "andrea.brown@example.com",
+      "first_name": "Andrea",
+      "last_name": "Brown",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 22,
+    "fields": {
+      "user": 22,
+      "phone": "+8801850000007",
+      "dob": "1974-03-22",
+      "gender": "female",
+      "address": "Flat 6A, House 97, Road 8, Uttara",
+      "city": "Machala",
+      "state": "Guayas",
+      "postal_code": "6506",
+      "country": "Bangladesh",
+      "blood_group": "A-",
+      "allergies": "Dust Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 23,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient8",
+      "email": "gabriela.gonzalez@example.com",
+      "first_name": "Gabriela",
+      "last_name": "Gonzalez",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 23,
+    "fields": {
+      "user": 23,
+      "phone": "+8801850000008",
+      "dob": "1976-01-04",
+      "gender": "female",
+      "address": "Flat 13A, House 24, Road 3, Gulshan",
+      "city": "Esmeraldas",
+      "state": "Loja",
+      "postal_code": "9695",
+      "country": "Bangladesh",
+      "blood_group": "AB+",
+      "allergies": "Drug Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 24,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient9",
+      "email": "carlos.l\u00f3pez@example.com",
+      "first_name": "Carlos",
+      "last_name": "L\u00f3pez",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 24,
+    "fields": {
+      "user": 24,
+      "phone": "+8801850000009",
+      "dob": "1980-12-10",
+      "gender": "male",
+      "address": "Flat 1A, House 74, Road 1, Mirpur",
+      "city": "Portoviejo",
+      "state": "Imbabura",
+      "postal_code": "3808",
+      "country": "Bangladesh",
+      "blood_group": "B-",
+      "allergies": "Food Allergy",
+      "medical_conditions": "Asthma"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 25,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient10",
+      "email": "camila.hernandez@example.com",
+      "first_name": "Camila",
+      "last_name": "Hernandez",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 25,
+    "fields": {
+      "user": 25,
+      "phone": "+8801850000010",
+      "dob": "1999-08-10",
+      "gender": "female",
+      "address": "Flat 11A, House 78, Road 5, Mirpur",
+      "city": "Esmeraldas",
+      "state": "Tungurahua",
+      "postal_code": "3835",
+      "country": "Bangladesh",
+      "blood_group": "AB+",
+      "allergies": "Dust Allergy",
+      "medical_conditions": "Diabetes"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 26,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient11",
+      "email": "paola.hernandez@example.com",
+      "first_name": "Paola",
+      "last_name": "Hernandez",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 26,
+    "fields": {
+      "user": 26,
+      "phone": "+8801850000011",
+      "dob": "2000-06-06",
+      "gender": "female",
+      "address": "Flat 18A, House 66, Road 9, Gulshan",
+      "city": "Portoviejo",
+      "state": "Loja",
+      "postal_code": "9565",
+      "country": "Bangladesh",
+      "blood_group": "B-",
+      "allergies": "Drug Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 27,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient12",
+      "email": "gabriela.anderson@example.com",
+      "first_name": "Gabriela",
+      "last_name": "Anderson",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 27,
+    "fields": {
+      "user": 27,
+      "phone": "+8801850000012",
+      "dob": "1992-01-23",
+      "gender": "female",
+      "address": "Flat 7A, House 82, Road 15, Badda",
+      "city": "Loja",
+      "state": "Pichincha",
+      "postal_code": "3484",
+      "country": "Bangladesh",
+      "blood_group": "B+",
+      "allergies": "Food Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 28,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient13",
+      "email": "luis.zambrano@example.com",
+      "first_name": "Luis",
+      "last_name": "Zambrano",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 28,
+    "fields": {
+      "user": 28,
+      "phone": "+8801850000013",
+      "dob": "1990-02-12",
+      "gender": "male",
+      "address": "Flat 19A, House 83, Road 15, Banani",
+      "city": "Machala",
+      "state": "Imbabura",
+      "postal_code": "1779",
+      "country": "Bangladesh",
+      "blood_group": "A-",
+      "allergies": "Food Allergy",
+      "medical_conditions": "None"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 29,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient14",
+      "email": "carolina.garcia@example.com",
+      "first_name": "Carolina",
+      "last_name": "Garcia",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 29,
+    "fields": {
+      "user": 29,
+      "phone": "+8801850000014",
+      "dob": "1972-05-22",
+      "gender": "female",
+      "address": "Flat 1A, House 31, Road 12, Banani",
+      "city": "Santo Domingo",
+      "state": "Loja",
+      "postal_code": "4820",
+      "country": "Bangladesh",
+      "blood_group": "B+",
+      "allergies": "None",
+      "medical_conditions": "Asthma"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 30,
+    "fields": {
+      "password": "pbkdf2_sha256$260000$HQyGxzxfOxv6nLKI8zF$w9Nmz1Rxm1fPY1HzJ2MU7MgKBfTJ1RfF3q9M1wJvXvQ=",
+      "username": "patient15",
+      "email": "mateo.zambrano@example.com",
+      "first_name": "Mateo",
+      "last_name": "Zambrano",
+      "role": "patient",
+      "is_active": true,
+      "date_joined": "2023-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.profile",
+    "pk": 30,
+    "fields": {
+      "user": 30,
+      "phone": "+8801850000015",
+      "dob": "1994-12-23",
+      "gender": "male",
+      "address": "Flat 10A, House 16, Road 6, Khilgaon",
+      "city": "Machala",
+      "state": "Chimborazo",
+      "postal_code": "7456",
+      "country": "Bangladesh",
+      "blood_group": "O-",
+      "allergies": "Drug Allergy",
+      "medical_conditions": "Asthma"
+    }
+  }
+]

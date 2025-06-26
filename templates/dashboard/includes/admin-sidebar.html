@@ -1,0 +1,59 @@
+{% load static %}
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+                <li class="menu-title">
+                    <span>Main</span>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'admin-dashboard' %}active{% endif %}">
+                    <a href="{% url 'accounts:admin-dashboard' %}"><i class="fe fe-home"></i> <span>Dashboard</span></a>
+                </li>
+                <li class="{% if 'appointment' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="{% url 'accounts:admin-appointment-list' %}"><i class="fe fe-calendar"></i> <span>Appointments</span></a>
+                </li>
+                
+                <li class="submenu {% if 'doctor' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fe fe-user-plus"></i> <span> Doctors</span> <span class="menu-arrow"></span></a>
+                    <ul style="display: {% if 'doctor' in request.resolver_match.url_name %}block{% else %}none{% endif %};">
+                        <li><a href="{% url 'accounts:admin-doctor-list' %}">Doctor List</a></li>
+                    </ul>
+                </li>
+                
+                <li class="submenu {% if 'patient' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fe fe-user"></i> <span> Patients</span> <span class="menu-arrow"></span></a>
+                    <ul style="display: {% if 'patient' in request.resolver_match.url_name %}block{% else %}none{% endif %};">
+                        <li><a href="{% url 'accounts:admin-patient-list' %}">Patient List</a></li>
+                    </ul>
+                </li>
+                
+                <li class="submenu {% if 'speciality' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fe fe-users"></i> <span> Specialities</span> <span class="menu-arrow"></span></a>
+                    <ul style="display: {% if 'speciality' in request.resolver_match.url_name %}block{% else %}none{% endif %};">
+                        <li><a href="{% url 'accounts:admin-speciality-list' %}">Speciality List</a></li>
+                    </ul>
+                </li>
+                
+                <!-- Nuevo módulo de seguridad -->
+                <li class="submenu {% if 'security' in request.path %}active{% endif %}">
+                    <a href="#"><i class="fe fe-shield"></i> <span> Security</span> <span class="menu-arrow"></span></a>
+                    <ul style="display: {% if 'security' in request.path %}block{% else %}none{% endif %};">
+                        <li {% if '/security/groups/' in request.path %}class="active"{% endif %}>
+                            <a href="{% url 'security:group-list' %}">Security Groups</a>
+                        </li>
+                        <li {% if '/security/modules/' in request.path %}class="active"{% endif %}>
+                            <a href="{% url 'security:module-list' %}">Modules</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="{% url 'accounts:logout' %}"><i class="fe fe-logout"></i> <span>Logout</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- /Sidebar -->
