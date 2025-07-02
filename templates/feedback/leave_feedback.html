@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Dejar Retroalimentación{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Califica tu experiencia</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="doctor-details mb-4">
+                            <div class="d-flex align-items-center">
+                                {% if booking.doctor.profile_image %}
+                                    <img src="{{ booking.doctor.profile_image.url }}" alt="Doctor" class="img-fluid rounded-circle" width="80">
+                                {% else %}
+                                    <img src="{% static 'img/default-avatar.jpg' %}" alt="Doctor" class="img-fluid rounded-circle" width="80">
+                                {% endif %}
+                                <div class="ml-3">
+                                    <h5>Dr. {{ booking.doctor.get_full_name }}</h5>
+                                    <p class="text-muted mb-0">{{ booking.doctor.speciality }}</p>
+                                    <p class="text-muted mb-0">Fecha de la cita: {{ booking.appointment_date|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label>{{ form.rating.label }}</label>
+                                <div class="rating-container">
+                                    {% for radio in form.rating %}
+                                    <div class="rating-option">
+                                        {{ radio.tag }}
+                                        <label for="{{ radio.id_for_label }}" class="star-label">
+                                            {% with value=radio.choice_value %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= value|add:"0" %}
+                                                <i class="fas fa-star"></i>
+                                                {% else %}
+                                                <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% endwith %}
+                                            <span>{{ radio.choice_label }}</span>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.rating.errors %}
+                                <div class="text-danger">
+                                    {{ form.rating.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>{{ form.comment.label }}</label>
+                                {{ form.comment }}
+                                {% if form.comment.errors %}
+                                <div class="text-danger">
+                                    {{ form.comment.errors }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Tu opinión nos ayuda a mejorar nuestro servicio.</small>
+                            </div>
+                            
+                            <div class="submit-section">
+                                <button type="submit" class="btn btn-primary submit-btn">Enviar Retroalimentación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    .rating-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .rating-option {
+        display: flex;
+        align-items: center;
+    }
+    .rating-option input[type="radio"] {
+        margin-right: 10px;
+    }
+    .star-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    .star-label i {
+        color: #ffc107;
+        margin-right: 2px;
+    }
+    .star-label span {
+        margin-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        // Highlight the stars when a rating is selected
+        $('input[name="rating"]').change(function() {
+            // Reset all stars
+            $('.star-label i').removeClass('fas').addClass('far');
+            
+            // Highlight stars for the selected rating
+            var selectedRating = $(this).val();
+            $(this).closest('.rating-option').find('.star-label i').each(function(index) {
+                if (index < selectedRating) {
+                    $(this).removeClass('far').addClass('fas');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

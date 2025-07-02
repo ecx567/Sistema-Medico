@@ -32,24 +32,25 @@
                         <div class="patient-info mt-4">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="info-block">
-                                        <h5><i class="fas fa-birthday-cake"></i> Age</h5>
-                                        <p>{{ appointment.patient.profile.age|default:"Not specified" }} years</p>
-                                    </div>
+                                    {% if appointment.patient.profile.age %}
+                                        <div class="info-block">
+                                            <h5><i class="fas fa-birthday-cake"></i> Age</h5>
+                                            <p>{{ appointment.patient.profile.age }} years</p>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if appointment.patient.profile.blood_group %}
+                                        <div class="info-block">
+                                            <h5><i class="fas fa-tint"></i> Blood Group</h5>
+                                            <p>{{ appointment.patient.profile.blood_group }}</p>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-6">
                                     <div class="info-block">
-                                        <h5><i class="fas fa-venus-mars"></i> Gender</h5>
-                                        <p>{{ appointment.patient.profile.gender|title|default:"Not specified" }}</p>
+                                        <h5><i class="fas fa-history"></i> Visit History</h5>
+                                        <p>{{ patient_history.count }} previous visits</p>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-block">
-                                        <h5><i class="fas fa-tint"></i> Blood Group</h5>
-                                        <p>{{ appointment.patient.profile.blood_group|default:"Not specified" }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
                                     <div class="info-block">
                                         <h5><i class="fas fa-check-circle"></i> Total Visits</h5>
                                         <p>{{ total_visits }}</p>
@@ -104,11 +105,51 @@
                                 {{ appointment.status|title }}
                             </span>
                         </div>
-
+                        
                         <div class="info-block">
                             <h5><i class="fas fa-money-bill"></i> Consulting Fee</h5>
                             <p>৳{{ appointment.doctor.profile.price_per_consultation }}</p>
                         </div>
+
+                        <!-- Información de Recordatorios -->
+                        <div class="info-block">
+                            <h5><i class="fas fa-bell"></i> Recordatorios</h5>
+                            {% if appointment.has_reminder %}
+                                {% for reminder in appointment.reminders.all %}
+                                    <p>
+                                        <span class="badge badge-pill {% if reminder.sent_to_patient and reminder.sent_to_doctor %}bg-success-light{% elif reminder.sent_to_patient or reminder.sent_to_doctor %}bg-warning-light{% else %}bg-danger-light{% endif %}">
+                                            Enviado el {{ reminder.sent_at|date:"d/m/Y H:i" }}
+                                        </span>
+                                    </p>
+                                    <div class="d-flex flex-wrap">
+                                        <span class="mr-3 mb-2">
+                                            <i class="fas fa-user"></i> Paciente: 
+                                            {% if reminder.sent_to_patient %}
+                                                <span class="text-success"><i class="fas fa-check"></i> Enviado</span>
+                                            {% else %}
+                                                <span class="text-danger"><i class="fas fa-times"></i> No enviado</span>
+                                            {% endif %}
+                                        </span>
+                                        <span class="mr-3 mb-2">
+                                            <i class="fas fa-user-md"></i> Doctor: 
+                                            {% if reminder.sent_to_doctor %}
+                                                <span class="text-success"><i class="fas fa-check"></i> Enviado</span>
+                                            {% else %}
+                                                <span class="text-danger"><i class="fas fa-times"></i> No enviado</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>No se han enviado recordatorios para esta cita.</p>
+                                {% if appointment.status == 'confirmed' or appointment.status == 'pending' %}
+                                    <a href="{% url 'reminders:send-test' appointment.id %}" class="btn btn-sm bg-info-light">
+                                        <i class="fas fa-bell"></i> Enviar recordatorio ahora
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <!-- Fin Información de Recordatorios -->
 
                         {% if appointment.status == 'pending' %}
                             <div class="mt-4">
@@ -152,25 +193,29 @@
                                     <thead>
                                         <tr>
                                             <th>Date</th>
-                                            <th>Time</th>
                                             <th>Status</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for visit in patient_history %}
-                                        <tr>
-                                            <td>{{ visit.appointment_date }}</td>
-                                            <td>{{ visit.appointment_time|time:"h:i A" }}</td>
-                                            <td>
-                                                <span class="badge badge-pill 
-                                                    {% if visit.status == 'confirmed' %}bg-success-light{% endif %}
-                                                    {% if visit.status == 'pending' %}bg-warning-light{% endif %}
-                                                    {% if visit.status == 'cancelled' %}bg-danger-light{% endif %}
-                                                    {% if visit.status == 'completed' %}bg-info-light{% endif %}">
-                                                    {{ visit.status|title }}
-                                                </span>
-                                            </td>
-                                        </tr>
+                                        {% for history in patient_history %}
+                                            <tr>
+                                                <td>{{ history.appointment_date }}</td>
+                                                <td>
+                                                    <span class="badge badge-pill 
+                                                        {% if history.status == 'confirmed' %}bg-success-light{% endif %}
+                                                        {% if history.status == 'pending' %}bg-warning-light{% endif %}
+                                                        {% if history.status == 'cancelled' %}bg-danger-light{% endif %}
+                                                        {% if history.status == 'completed' %}bg-info-light{% endif %}">
+                                                        {{ history.status|title }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'doctors:appointment-detail' history.pk %}" class="btn btn-sm bg-info-light">
+                                                        <i class="far fa-eye"></i> View
+                                                    </a>
+                                                </td>
+                                            </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -178,57 +223,57 @@
                         </div>
                     </div>
                 {% endif %}
+            </div>
+        </div>
 
-                {% if appointment.status == 'completed' and not appointment.prescription %}
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4 class="card-title">Add Prescription</h4>
-                                    <p>Add prescription details for this appointment</p>
-                                    <a href="{% url 'doctors:add-prescription' appointment.id %}" class="btn btn-primary">
-                                        Add Prescription
-                                    </a>
-                                </div>
-                            </div>
+        {% if appointment.status == 'completed' and not appointment.prescription %}
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Add Prescription</h4>
+                            <p>Add prescription details for this appointment</p>
+                            <a href="{% url 'doctors:add-prescription' appointment.id %}" class="btn btn-primary">
+                                Add Prescription
+                            </a>
                         </div>
                     </div>
-                {% endif %}
+                </div>
+            </div>
+        {% endif %}
 
-                {% if appointment.prescription %}
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Prescription Details</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="prescription-info">
-                                                <h5>Symptoms</h5>
-                                                <p>{{ appointment.prescription.symptoms }}</p>
-                                                
-                                                <h5>Diagnosis</h5>
-                                                <p>{{ appointment.prescription.diagnosis }}</p>
-                                                
-                                                <h5>Medication & Instructions</h5>
-                                                <div>{{ appointment.prescription.medications|safe }}</div>
-                                                
-                                                {% if appointment.prescription.notes %}
-                                                    <h5>Additional Notes</h5>
-                                                    <p>{{ appointment.prescription.notes }}</p>
-                                                {% endif %}
-                                            </div>
-                                        </div>
+        {% if appointment.prescription %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Prescription Details</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="prescription-info">
+                                        <h5>Symptoms</h5>
+                                        <p>{{ appointment.prescription.symptoms }}</p>
+                                        
+                                        <h5>Diagnosis</h5>
+                                        <p>{{ appointment.prescription.diagnosis }}</p>
+                                        
+                                        <h5>Medication & Instructions</h5>
+                                        <div>{{ appointment.prescription.medications|safe }}</div>
+                                        
+                                        {% if appointment.prescription.notes %}
+                                            <h5>Additional Notes</h5>
+                                            <p>{{ appointment.prescription.notes }}</p>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                {% endif %}
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -252,14 +297,20 @@
         margin-bottom: 0;
     }
     .medical-info {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
+        border-top: 1px solid #f0f0f0;
+        padding-top: 20px;
     }
-    .badge {
-        font-size: 0.9em;
-        padding: 8px 12px;
+    .patient-details p {
+        margin-bottom: 5px;
+    }
+    .prescription-info h5 {
+        font-weight: 600;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    .prescription-info p {
+        margin-bottom: 15px;
     }
 </style>
 {% endblock %}
-{% endblock %} 
+{% endblock %}

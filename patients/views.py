@@ -40,6 +40,10 @@ class PatientProfileUpdateView(PatientRequiredMixin, UpdateView):
     def form_valid(self, form):
         user = form.save(commit=False)
         profile = user.profile
+        #messages.success(self.request, "Profile Updated successfully")
+        #return super().form_valid(form)
+
+    
 
         # Handle profile image upload
         if self.request.FILES.get("avatar"):
@@ -71,10 +75,19 @@ class PatientProfileUpdateView(PatientRequiredMixin, UpdateView):
 
         messages.success(self.request, "Profile updated successfully")
         return redirect(self.success_url)
+    
+    # def form_valid(self, form):
+    #     messages.success(self.request, "Profile Updated successfully")
+    #     return super().form_valid(form)
+
 
     def form_invalid(self, form):
         messages.error(self.request, "Please correct the errors below")
         return super().form_invalid(form)
+    
+    # def form_invalid(self, form):
+    #     messages.error(self.request, "Error updating profile")
+    #     return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -89,6 +102,9 @@ class PatientProfileUpdateView(PatientRequiredMixin, UpdateView):
             ("AB-", "AB-"),
         ]
         return context
+    #  def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     return context
 
 
 class AppointmentDetailView(DetailView):
@@ -100,6 +116,9 @@ class AppointmentDetailView(DetailView):
         return Booking.objects.select_related(
             "doctor", "doctor__profile", "patient", "patient__profile"
         ).filter(patient=self.request.user)
+    
+    # def get_queryset(self):
+    #     return Booking.objects.filter(patient=self.request.user)
 
 
 class AppointmentCancelView(View):
@@ -127,6 +146,19 @@ class AppointmentPrintView(DetailView):
         return Booking.objects.select_related(
             "doctor", "doctor__profile", "patient", "patient__profile"
         ).filter(patient=self.request.user)
+    
+    # def get_queryset(self):
+    #     return Booking.objects.filter(patient=self.request.user)
+
+    # def get(self, request, *args, **kwargs):
+    #     response = super().get(request, *args, **kwargs)
+    #     if request.GET.get("download"):
+    #         html = render_to_string(
+    #             "patients/appointment-print.html",
+    #             {"appointment": self.get_object()},
+    #         )
+    #         return HttpResponse(html, content_type="application/pdf")
+    #     return response
 
     def render_to_response(self, context):
         html_string = render_to_string(
@@ -141,6 +173,10 @@ class ChangePasswordView(PatientRequiredMixin, View):
     def get(self, request):
         form = ChangePasswordForm()
         return render(request, self.template_name, {"form": form})
+    
+    # def get(self, request):
+    #     form = ChangePasswordForm(request.user)
+    #     return render(request, self.template_name, {"form": form})
 
     def post(self, request):
         form = ChangePasswordForm(request.POST)
@@ -160,6 +196,17 @@ class ChangePasswordView(PatientRequiredMixin, View):
                 messages.error(request, "Current password is incorrect")
 
         return render(request, self.template_name, {"form": form})
+    
+    # def post(self, request):
+    #     form = ChangePasswordForm(request.user, request.POST)
+    #     if form.is_valid():
+    #         user = form.save()
+    #         update_session_auth_hash(request, user)
+    #         messages.success(request, "Your password was successfully updated!")
+    #         return redirect("patients:dashboard")
+    #     else:
+    #         messages.error(request, "Please correct the error below.")
+    #     return render(request, self.template_name, {"form": form})
 
 
 class AddReviewView(PatientRequiredMixin, CreateView):
@@ -196,3 +243,25 @@ class AddReviewView(PatientRequiredMixin, CreateView):
             "patients:appointment-detail",
             kwargs={"pk": self.kwargs["booking_id"]},
         )
+    
+
+# class AddReviewView(PatientRequiredMixin, CreateView):
+#     model = Review
+#     form_class = ReviewForm
+#     template_name = "patients/add-review.html"
+#     success_url = reverse_lazy("patients:dashboard")
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["doctor"] = get_object_or_404(
+#             User, id=self.kwargs["doctor_id"], role="doctor"
+#         )
+#         return context
+
+#     def form_valid(self, form):
+#         form.instance.patient = self.request.user
+#         form.instance.doctor = get_object_or_404(
+#             User, id=self.kwargs["doctor_id"], role="doctor"
+#         )
+#         messages.success(self.request, "Review added successfully")
+#         return super().form_valid(form)

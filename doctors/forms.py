@@ -4,7 +4,10 @@ from accounts.models import User
 from bookings.models import Prescription
 from ckeditor5.widgets import CKEditor5Widget
 
-
+from core.models import Speciality
+from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import Group
 
 class DoctorProfileForm(forms.ModelForm):
     class Meta:
@@ -28,3 +31,4 @@ class PrescriptionForm(forms.ModelForm):
                 attrs={"rows": 3, "class": "form-control"}
             ),
         }
+#

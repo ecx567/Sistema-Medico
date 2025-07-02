@@ -1,0 +1,191 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load permission_filters %}
+
+{% block title %}
+Gestión de Permisos
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">Gestión de Permisos</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Gestión de Permisos</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Page Header -->
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Instrucciones -->
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading"><i class="fe fe-info mr-2"></i>Instrucciones</h4>
+                        <ol class="mb-0">
+                            <li>Selecciona un grupo del primer selector</li>
+                            <li>Elige un módulo para ver y configurar sus permisos</li>
+                            <li>Marca los permisos que deseas asignar al grupo para ese módulo</li>
+                            <li>Haz clic en "Guardar" para aplicar los cambios</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Selectores -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <form method="get" action="" id="groupForm">
+                                    <label><i class="fe fe-users mr-1"></i> 1. Seleccione un Grupo</label>
+                                    <select name="group" id="groupSelector" class="form-control select" onchange="this.form.submit()">
+                                        <option value="">Seleccione un grupo</option>
+                                        {% for group in groups %}
+                                            <option value="{{ group.id }}" {% if selected_group.id == group.id %}selected{% endif %}>
+                                                {{ group.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <form method="get" action="" id="moduleForm">
+                                    {% if selected_group %}
+                                        <input type="hidden" name="group" value="{{ selected_group.id }}">
+                                    {% endif %}
+                                    <label><i class="fe fe-layout mr-1"></i> 2. Seleccione un Módulo</label>
+                                    <select name="module" id="moduleSelector" class="form-control select" onchange="this.form.submit()" {% if not selected_group %}disabled{% endif %}>
+                                        <option value="">Seleccione un módulo</option>
+                                        {% for module in modules %}
+                                            <option value="{{ module.id }}" {% if selected_module.id == module.id %}selected{% endif %}>
+                                                {{ module.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if selected_group and selected_module %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="fe fe-shield mr-1"></i> 3. Configure Permisos
+                        <span class="float-right">
+                            {% if has_permissions %}
+                                <button id="selectAll" class="btn btn-sm btn-primary mr-1">
+                                    <i class="fe fe-check-square mr-1"></i>Seleccionar Todos
+                                </button>
+                                <button id="deselectAll" class="btn btn-sm btn-danger mr-1">
+                                    <i class="fe fe-square mr-1"></i>Deseleccionar Todos
+                                </button>
+                            {% endif %}
+                        </span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if has_permissions %}
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="group" value="{{ selected_group.id }}">
+                        <input type="hidden" name="module" value="{{ selected_module.id }}">
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Permiso</th>
+                                        <th width="15%">Estado</th>
+                                        <th>Descripción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for perm in permissions %}
+                                    <tr>
+                                        <td>
+                                            <label for="perm_{{ perm.id }}" class="mb-0 font-weight-bold">
+                                                {{ perm.name }}
+                                            </label>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" 
+                                                       class="custom-control-input permission-checkbox" 
+                                                       id="perm_{{ perm.id }}" 
+                                                       name="perm_{{ perm.id }}"
+                                                       {% if permissions_data|get_item:perm.id|get_item:'is_active' %}checked{% endif %}>
+                                                <label class="custom-control-label" for="perm_{{ perm.id }}"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ perm.description }}</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-3 text-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fe fe-save mr-1"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fe fe-alert-circle" style="font-size: 48px; color: #aaa;"></i>
+                        <p class="mt-3">No hay permisos disponibles para este módulo.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Inicializar selects con estilo
+        if ($('.select').length > 0) {
+            $('.select').select2({
+                width: '100%'
+            });
+        }
+        
+        // Botones de seleccionar/deseleccionar todos
+        $('#selectAll').click(function(e) {
+            e.preventDefault();
+            $('.permission-checkbox').prop('checked', true);
+        });
+        
+        $('#deselectAll').click(function(e) {
+            e.preventDefault();
+            $('.permission-checkbox').prop('checked', false);
+        });
+        
+        // Restaurar el valor del grupo en el formulario de módulo
+        $('#groupSelector').change(function() {
+            const groupId = $(this).val();
+            $('#moduleForm input[name="group"]').val(groupId);
+        });
+    });
+</script>
+{% endblock %}

@@ -37,6 +37,13 @@
                         <li {% if request.path == '/admin/reports/revenue/' %}class="active"{% endif %}><a href="{% url 'admin-revenue-report' %}">Revenue Reports</a></li>
                     </ul>
                 </li>
+                <!-- Nuevo enlace para gestión de permisos -->
+                <li {% if '/security/permissions/manage/' in request.path %}class="active"{% endif %}> 
+                    <a href="{% url 'permissions:manage' %}"><i class="fe fe-shield"></i> <span>Gestión de Permisos</span></a>
+                </li>
+                <li {% if '/security/audit/' in request.path %}class="active"{% endif %}> 
+                    <a href="{% url 'audit:dashboard' %}"><i class="fe fe-activity"></i> <span>Auditoría del Sistema</span></a>
+                </li>
             </ul>
         </div>
     </div>

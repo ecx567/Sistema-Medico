@@ -44,6 +44,11 @@ from patients.forms import ChangePasswordForm
 from utils.htmx import render_toast_message_for_api
 from accounts.models import User
 
+
+# Importar el modelo de Feedback
+from feedback.models import Feedback
+from django.db.models import Avg, Count
+
 days = {
     0: Sunday,
     1: Monday,
@@ -224,6 +229,33 @@ class DoctorProfileView(DetailView):
             ),
         }
 
+        # --- Feedback integration ---
+        feedbacks = Feedback.objects.filter(
+            doctor=doctor,
+            is_approved=True
+        ).order_by('-created_at')
+
+        feedback_stats = feedbacks.aggregate(
+            avg_rating=Avg('rating'),
+            count=Count('id'),
+            five_star=Count('id', filter=Q(rating=5)),
+            four_star=Count('id', filter=Q(rating=4)),
+            three_star=Count('id', filter=Q(rating=3)),
+            two_star=Count('id', filter=Q(rating=2)),
+            one_star=Count('id', filter=Q(rating=1))
+        )
+
+        total = feedback_stats['count'] or 1
+        feedback_stats.update({
+            'five_star_percent': (feedback_stats['five_star'] / total) * 100,
+            'four_star_percent': (feedback_stats['four_star'] / total) * 100,
+            'three_star_percent': (feedback_stats['three_star'] / total) * 100,
+            'two_star_percent': (feedback_stats['two_star'] / total) * 100,
+            'one_star_percent': (feedback_stats['one_star'] / total) * 100,
+        })
+
+        recent_feedbacks = feedbacks[:5]
+
         context.update(
             {
                 "current_day": current_day,
@@ -231,6 +263,8 @@ class DoctorProfileView(DetailView):
                 "reviews": doctor.reviews_received.select_related(
                     "patient", "patient__profile"
                 ).order_by("-created_at"),
+                "feedbacks": recent_feedbacks,
+                "feedback_stats": feedback_stats,
             }
         )
 

@@ -1,5 +1,5 @@
 {% extends 'includes/patient-sidebar.html' %}
-
+{% load i18n %}
 {% block page_name1 %}Dashboard{% endblock %}
 {% block page_name2 %}Dashboard{% endblock %}
 
@@ -10,16 +10,16 @@
             <nav class="user-tabs mb-4">
                 <ul class="nav nav-tabs nav-tabs-bottom nav-justified">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#pat_appointments" data-toggle="tab">Appointments</a>
+                        <a class="nav-link active" href="#pat_appointments" data-toggle="tab">{% trans "Appointments" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#pat_prescriptions" data-toggle="tab">Prescriptions</a>
+                        <a class="nav-link" href="#pat_prescriptions" data-toggle="tab">{% trans "Prescriptions" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#pat_medical_records" data-toggle="tab">Medical Records</a>
+                        <a class="nav-link" href="#pat_medical_records" data-toggle="tab">{% trans "Medical Records" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#pat_billing" data-toggle="tab">Billing</a>
+                        <a class="nav-link" href="#pat_billing" data-toggle="tab">{% trans "Billing" %}</a>
                     </li>
                 </ul>
             </nav>
@@ -35,11 +35,11 @@
                                 <table class="table table-hover table-center mb-0">
                                     <thead>
                                     <tr>
-                                        <th>Doctor</th>
-                                            <th>Appointment Date</th>
-                                        <th>Booking Date</th>
-                                        <th>Status</th>
-                                            <th>Actions</th>
+                                        <th>{% trans "Doctor" %}</th>
+                                            <th>{% trans "Appointment Date" %}</th>
+                                        <th>{% trans "Booking Date" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                            <th>{% trans "Actions" %}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -79,23 +79,23 @@
                                                     {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
                                                         <form method="post" action="{% url 'patients:appointment-cancel' appointment.pk %}" style="display: inline;">
                                                             {% csrf_token %}
-                                                            <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                                <i class="fas fa-times"></i> Cancel
+                                                            <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('{% trans "Are you sure you want to cancel this appointment?" %}')">
+                                                                <i class="fas fa-times"></i> {% trans "Cancel" %}
                                                             </button>
                                                         </form>
                                                     {% endif %}
                                                     <a href="{% url 'patients:appointment-detail' appointment.pk %}" class="btn btn-sm bg-info-light">
-                                                        <i class="far fa-eye"></i> View
+                                                        <i class="far fa-eye"></i> {% trans "View" %}
                                                     </a>
                                                     <a href="{% url 'patients:appointment-print' appointment.pk %}" target="_blank" class="btn btn-sm bg-primary-light">
-                                                    <i class="fas fa-print"></i> Print
+                                                    <i class="fas fa-print"></i> {% trans "Print" %}
                                                 </a>
                                             </div>
                                         </td>
                                     </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="5" class="text-center">No appointments found</td>
+                                            <td colspan="5" class="text-center">{% trans "No appointments found" %}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -105,19 +105,63 @@
                     </div>
                 </div>
                 <!-- /Appointment Tab -->
-
-                <!-- Other tabs remain unchanged -->
+                
+                <!-- Prescription Tab -->
                 <div class="tab-pane fade" id="pat_prescriptions">
                     <!-- Prescription content -->
+                    <div class="card card-table mb-0">
+                        <div class="card-body">
+                            <!-- Prescription content goes here -->
+                            <p class="text-center">{% trans "Your prescription history will appear here" %}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="tab-pane fade" id="pat_medical_records">
-                    <!-- Medical Records content -->
-                </div>
+                
+                <!--
+                
+                
+                -->
+                <!-- Billing Tab -->
                 <div class="tab-pane fade" id="pat_billing">
-                    <!-- Billing content -->
+                    <div class="card card-table mb-0">
+                        <div class="card-body">
+                            <!-- Billing content goes here -->
+                            <p class="text-center">{% trans "Your billing information will appear here" %}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- /Tab Content -->
         </div>
     </div>
+{% endblock %}
+
+{% block sidebar_nav_items %}
+    <!-- Existing sidebar items -->
+    <li class="nav-item active">
+        <a href="{% url 'patients:dashboard' %}">
+            <i class="fas fa-columns"></i>
+            <span>{% trans "Dashboard" %}</span>
+        </a>
+    </li>
+    
+    <!-- Other menu items -->
+    <li class="nav-item">
+        <a href="{% url 'patients:profile-setting' %}">
+            <i class="fas fa-user-cog"></i>
+            <span>{% trans "Profile Settings" %}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{% url 'patients:change-password' %}">
+            <i class="fas fa-lock"></i>
+            <span>{% trans "Change Password" %}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>{% trans "Logout" %}</span>
+        </a>
+    </li>
 {% endblock %}

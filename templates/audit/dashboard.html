@@ -1,0 +1,222 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}
+Dashboard de Auditoría
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">Dashboard de Auditoría</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Auditoría del Sistema</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Page Header -->
+    
+    <!-- Estado del sistema -->
+    <div class="row">
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="dash-widget-header">
+                        <span class="dash-widget-icon text-primary border-primary">
+                            <i class="fe fe-shield"></i>
+                        </span>
+                        <div class="dash-count">
+                            <h3>{{ total_logs }}</h3>
+                        </div>
+                    </div>
+                    <div class="dash-widget-info">
+                        <h6 class="text-muted">Total de registros</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="dash-widget-header">
+                        <span class="dash-widget-icon text-success border-success">
+                            <i class="fe fe-log-in"></i>
+                        </span>
+                        <div class="dash-count">
+                            <h3>{{ login_attempts }}</h3>
+                        </div>
+                    </div>
+                    <div class="dash-widget-info">
+                        <h6 class="text-muted">Intentos de acceso</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="dash-widget-header">
+                        <span class="dash-widget-icon text-danger border-danger">
+                            <i class="fe fe-x-circle"></i>
+                        </span>
+                        <div class="dash-count">
+                            <h3>{{ failed_logins }}</h3>
+                        </div>
+                    </div>
+                    <div class="dash-widget-info">
+                        <h6 class="text-muted">Intentos fallidos</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="dash-widget-header">
+                        <span class="dash-widget-icon text-warning border-warning">
+                            <i class="fe fe-alert-triangle"></i>
+                        </span>
+                        <div class="dash-count">
+                            <h3>{{ critical_events|length }}</h3>
+                        </div>
+                    </div>
+                    <div class="dash-widget-info">
+                        <h6 class="text-muted">Eventos críticos recientes</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Estado del sistema -->
+    
+    <div class="row">
+        <!-- Eventos críticos recientes -->
+        <div class="col-md-6">
+            <div class="card card-table">
+                <div class="card-header">
+                    <h4 class="card-title">Eventos críticos recientes</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Acción</th>
+                                    <th>Criticidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in critical_events %}
+                                <tr>
+                                    <td>{{ event.timestamp|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if event.user %}
+                                            {{ event.user.get_full_name|default:event.user.username }}
+                                        {% else %}
+                                            Sistema
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ event.action }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if event.criticality == 'warning' %}badge-warning{% endif %}
+                                            {% if event.criticality == 'error' %}badge-danger{% endif %}
+                                            {% if event.criticality == 'critical' %}badge-dark{% endif %}">
+                                            {{ event.get_criticality_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No hay eventos críticos recientes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Eventos críticos recientes -->
+        
+        <!-- Actividad reciente -->
+        <div class="col-md-6">
+            <div class="card card-table">
+                <div class="card-header">
+                    <h4 class="card-title">Actividad reciente (últimas 24h)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in recent_events %}
+                                <tr>
+                                    <td>{{ event.timestamp|date:"H:i:s" }}</td>
+                                    <td>
+                                        {% if event.user %}
+                                            {{ event.user.get_full_name|default:event.user.username }}
+                                        {% else %}
+                                            Sistema
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ event.get_event_type_display }}</td>
+                                    <td>{{ event.action }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No hay actividad reciente</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Actividad reciente -->
+    </div>
+    
+    <div class="row">
+        <!-- Enlaces rápidos -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <a href="{% url 'audit:logs' %}" class="btn btn-primary btn-lg">
+                                <i class="fe fe-list mr-2"></i> Ver todos los registros
+                            </a>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <a href="{% url 'audit:settings' %}" class="btn btn-info btn-lg">
+                                <i class="fe fe-settings mr-2"></i> Configuración de auditoría
+                            </a>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <a href="/super-admin/security_audit/auditlog/" class="btn btn-secondary btn-lg">
+                                <i class="fe fe-database mr-2"></i> Ver en Admin Django
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Enlaces rápidos -->
+    </div>
+</div>
+{% endblock %}

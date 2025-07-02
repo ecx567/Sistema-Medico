@@ -1,0 +1,77 @@
+:\Users\CORREA-ERICK\Documents\Medical-System\doccure-master\reminders\templates\reminders\user_preferences.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Preferencias de Recordatorios{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                {% if request.user.role == 'DOCTOR' %}
+                    {% include 'includes/doctor-sidebar-menu.html' with page='profile_settings' %}
+                {% else %}
+                    {% include 'includes/patient-sidebar-menu.html' with page='profile_settings' %}
+                {% endif %}
+            </div>
+            
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Preferencias de Recordatorios</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="form-group row">
+                                <label class="col-md-3 col-form-label">Recibir recordatorios</label>
+                                <div class="col-md-9">
+                                    <div class="custom-control custom-switch">
+                                        {{ form.enabled }}
+                                        <label class="custom-control-label" for="{{ form.enabled.id_for_label }}">
+                                            {% if preferences.enabled %}Activado{% else %}Desactivado{% endif %}
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">Habilitar o deshabilitar el envío de recordatorios para sus citas</small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group row">
+                                <label class="col-md-3 col-form-label">Recordatorios por email</label>
+                                <div class="col-md-9">
+                                    <div class="custom-control custom-switch">
+                                        {{ form.email_enabled }}
+                                        <label class="custom-control-label" for="{{ form.email_enabled.id_for_label }}">
+                                            {% if preferences.email_enabled %}Activado{% else %}Desactivado{% endif %}
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">Recibir recordatorios por correo electrónico</small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group row">
+                                <label class="col-md-3 col-form-label">Horas de anticipación</label>
+                                <div class="col-md-9">
+                                    {{ form.hours_before }}
+                                    <small class="form-text text-muted">
+                                        Cuántas horas antes de la cita desea recibir el recordatorio. 
+                                        Deje en blanco para usar la configuración global.
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group row">
+                                <div class="col-md-9 offset-md-3">
+                                    <button type="submit" class="btn btn-primary">Guardar Preferencias</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

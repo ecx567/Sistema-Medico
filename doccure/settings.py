@@ -28,6 +28,12 @@ INSTALLED_APPS = [
     "bookings",
     "ckeditor5",
     #"security",
+    'reports.apps.ReportsConfig',
+    'feedback.apps.FeedbackConfig',
+    "reminders",
+    "security.apps.SecurityConfig",  # Nueva app de seguridad
+    "security.permissions.apps.PermissionsConfig",  # Sub-app de permisos
+    "security.audit.apps.AuditConfig",  # Nueva sub-app de auditoría
 ]
 
 MIDDLEWARE = [
@@ -137,3 +143,12 @@ CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 DEBUG_TOOLBAR_CONFIG = {
     "IS_RUNNING_TESTS": False,
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+#EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

@@ -1,8 +1,11 @@
 from django import forms
-
 from accounts.models import User
 from core.models import Review
+from django.utils.translation import gettext_lazy as _
+from .models import MedicalRecord, MedicalDiagnosis
 
+from django.contrib.auth.models import Group
+from django.contrib.auth.password_validation import validate_password
 
 class PatientProfileForm(forms.ModelForm):
     """
@@ -132,3 +135,44 @@ class ReviewForm(forms.ModelForm):
                 }
             ),
         }
+
+##################
+
+class MedicalRecordForm(forms.ModelForm):
+    """Formulario para crear/editar el historial médico"""
+    
+    class Meta:
+        model = MedicalRecord
+        fields = [
+            'allergies', 'medications', 'chronic_diseases', 
+            'previous_surgeries', 'family_history', 
+            'blood_type', 'height', 'weight', 'notes'
+        ]
+        widgets = {
+            'allergies': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'medications': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'chronic_diseases': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'previous_surgeries': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'family_history': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'blood_type': forms.TextInput(attrs={'class': 'form-control'}),
+            'height': forms.NumberInput(attrs={'class': 'form-control'}),
+            'weight': forms.NumberInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }
+
+
+class MedicalDiagnosisForm(forms.ModelForm):
+    """Formulario para agregar/editar diagnósticos médicos"""
+    
+    class Meta:
+        model = MedicalDiagnosis
+        fields = ['diagnosis', 'diagnosis_date', 'treatment', 'notes']
+        widgets = {
+            'diagnosis': forms.TextInput(attrs={'class': 'form-control'}),
+            'diagnosis_date': forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}),
+            'treatment': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }
+
+
+   

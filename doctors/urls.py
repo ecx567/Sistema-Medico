@@ -92,4 +92,5 @@ urlpatterns = [
         PrescriptionDetailView.as_view(),
         name="prescription-detail",
     ),
+    #path('add-doctor/', AddDoctorView.as_view(), name='add_doctor'),
 ]

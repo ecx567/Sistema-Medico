@@ -50,6 +50,23 @@
                     </div>
                 </div>
                 
+                <!-- Información de Recordatorios -->
+                <div class="booking-reminder mt-4">
+                    <h5><i class="fas fa-bell"></i> Recordatorios</h5>
+                    {% if appointment.has_reminder %}
+                        {% for reminder in appointment.reminders.all %}
+                            <p>
+                                <span class="badge badge-pill {% if reminder.sent_to_patient %}bg-success-light{% else %}bg-danger-light{% endif %}">
+                                    Recordatorio enviado el {{ reminder.sent_at|date:"d/m/Y H:i" }}
+                                </span>
+                            </p>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Se enviará un recordatorio 24 horas antes de su cita.</p>
+                    {% endif %}
+                </div>
+                <!-- Fin Información de Recordatorios -->
+                
                 <div class="booking-actions text-right">
                     {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
                     <form method="post" action="{% url 'patients:appointment-cancel' appointment.pk %}" style="display: inline;">
@@ -94,4 +111,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

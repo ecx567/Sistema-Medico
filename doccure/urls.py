@@ -100,7 +100,15 @@ urlpatterns = (
                     ),
                 ],
             ),
+            
         ),
+        path('reports/', include('reports.urls')),
+        path('feedback/', include('feedback.urls', namespace='feedback')),
+        path("reminders/", include("reminders.urls")),
+        path('security/', include('security.urls')),
+        
+        
+        
         # path("super-admin/", admin.site.urls),
         # path("accounts/", include("accounts.urls")),
         # path("patients/", include("patients.urls")),

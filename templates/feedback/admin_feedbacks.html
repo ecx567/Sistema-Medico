@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administrar Retroalimentaciones{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'accounts:admin-dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Administrar Retroalimentaciones</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Administrar Retroalimentaciones</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Breadcrumb -->
+
+<!-- Page Content -->
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Profile Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                {% include 'dashboard/includes/admin-sidebar.html' %}
+            </div>
+            <!-- /Profile Sidebar -->
+            
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Retroalimentaciones de Pacientes</h4>
+                        <div class="status-filter">
+                            <div class="btn-group">
+                                <a href="{% url 'feedback:admin-feedbacks' %}" class="btn {% if filter_status == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    Todas
+                                </a>
+                                <a href="{% url 'feedback:admin-feedbacks' %}?status=pending" class="btn {% if filter_status == 'pending' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    Pendientes
+                                </a>
+                                <a href="{% url 'feedback:admin-feedbacks' %}?status=approved" class="btn {% if filter_status == 'approved' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    Aprobadas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Paciente</th>
+                                        <th>Médico</th>
+                                        <th>Calificación</th>
+                                        <th>Comentario</th>
+                                        <th>Sentimiento</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for feedback in page_obj %}
+                                    <tr id="feedback-row-{{ feedback.id }}">
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="#" class="avatar avatar-sm mr-2">
+                                                    <img class="avatar-img rounded-circle" src="{{ feedback.patient.profile.image.url|default:'static/img/default-avatar.jpg' }}" alt="Paciente">
+                                                </a>
+                                                <a href="#">{{ feedback.patient.get_full_name }}</a>
+                                            </h2>
+                                        </td>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="{% url 'doctors:doctor-profile' feedback.doctor.username %}" class="avatar avatar-sm mr-2">
+                                                    <img class="avatar-img rounded-circle" src="{{ feedback.doctor.profile.image.url|default:'static/img/default-avatar.jpg' }}" alt="Doctor">
+                                                </a>
+                                                <a href="{% url 'doctors:doctor-profile' feedback.doctor.username %}">Dr. {{ feedback.doctor.get_full_name }}</a>
+                                            </h2>
+                                        </td>
+                                        <td>
+                                            <div class="rating">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star {% if forloop.counter <= feedback.rating %}filled{% endif %}"></i>
+                                                {% endfor %}
+                                                <span>({{ feedback.rating }})</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="comment-excerpt">
+                                                {% if feedback.comment %}
+                                                    {{ feedback.comment|truncatechars:50 }}
+                                                    {% if feedback.comment|length > 50 %}
+                                                        <a href="#" class="text-info show-full-comment" data-comment="{{ feedback.comment }}">Ver más</a>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">Sin comentario</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if feedback.sentiment %}
+                                                <span class="badge badge-{% if feedback.sentiment == 'positivo' %}success{% elif feedback.sentiment == 'negativo' %}danger{% else %}secondary{% endif %}">
+                                                    {{ feedback.sentiment|title }}
+                                                </span>
+                                                {% if feedback.sentiment_score %}
+                                                    <small class="text-muted">({{ feedback.sentiment_score|floatformat:2 }})</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">No analizado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ feedback.created_at|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <span class="badge badge-{% if feedback.is_approved %}success{% else %}warning{% endif %}">
+                                                {% if feedback.is_approved %}Aprobada{% else %}Pendiente{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                {% if feedback.is_approved %}
+                                                <button type="button" class="btn btn-sm btn-danger reject-btn" data-feedback-id="{{ feedback.id }}">
+                                                    <i class="fas fa-times"></i> Rechazar
+                                                </button>
+                                                {% else %}
+                                                <button type="button" class="btn btn-sm btn-success approve-btn" data-feedback-id="{{ feedback.id }}">
+                                                    <i class="fas fa-check"></i> Aprobar
+                                                </button>
+                                                {% endif %}
+                                                <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#viewFeedbackModal{{ feedback.id }}">
+                                                    <i class="fas fa-eye"></i> Detalles
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Modal para ver retroalimentación completa -->
+                                    <div class="modal fade" id="viewFeedbackModal{{ feedback.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Retroalimentación Completa</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="feedback-details">
+                                                        <p><strong>Paciente:</strong> {{ feedback.patient.get_full_name }}</p>
+                                                        <p><strong>Médico:</strong> Dr. {{ feedback.doctor.get_full_name }}</p>
+                                                        <p><strong>Fecha de cita:</strong> {{ feedback.booking.appointment_date|date:"d/m/Y" }}</p>
+                                                        <p><strong>Calificación:</strong> 
+                                                            {% for i in "12345" %}
+                                                                <i class="fas fa-star {% if forloop.counter <= feedback.rating %}filled{% endif %}"></i>
+                                                            {% endfor %}
+                                                        </p>
+                                                        <p><strong>Comentario:</strong></p>
+                                                        <div class="feedback-comment">
+                                                            {% if feedback.comment %}
+                                                                {{ feedback.comment }}
+                                                            {% else %}
+                                                                <span class="text-muted">Sin comentario</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        
+                                                        <!-- Añadir sección para mostrar respuestas -->
+                                                        {% if feedback.response %}
+                                                        <div class="doctor-response mt-3">
+                                                            <h6>Respuesta del médico:</h6>
+                                                            <div class="bg-light p-3 rounded">
+                                                                {{ feedback.response.response_text }}
+                                                                <div class="text-muted mt-2">
+                                                                    <small>Respondido el {{ feedback.response.created_at|date:"d/m/Y H:i" }}</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% else %}
+                                                        <p class="text-muted mt-2">El médico aún no ha respondido a esta retroalimentación.</p>
+                                                        {% endif %}
+                                                        
+                                                        <!-- Información de sentimiento en el modal -->
+                                                        {% if feedback.sentiment %}
+                                                        <p><strong>Análisis de sentimiento:</strong> 
+                                                            <span class="badge badge-{% if feedback.sentiment == 'positivo' %}success{% elif feedback.sentiment == 'negativo' %}danger{% else %}secondary{% endif %}">
+                                                                {{ feedback.sentiment|title }}
+                                                            </span>
+                                                            {% if feedback.sentiment_score %}
+                                                                <small>(Puntuación: {{ feedback.sentiment_score|floatformat:2 }})</small>
+                                                            {% endif %}
+                                                        </p>
+                                                        {% endif %}
+                                                        
+                                                        <p><strong>Fecha de retroalimentación:</strong> {{ feedback.created_at|date:"d/m/Y H:i" }}</p>
+                                                        <p><strong>Estado:</strong> 
+                                                            <span class="badge badge-{% if feedback.is_approved %}success{% else %}warning{% endif %}">
+                                                                {% if feedback.is_approved %}Aprobada{% else %}Pendiente{% endif %}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="admin-notes">
+                                                        <h6>Notas Administrativas</h6>
+                                                        <textarea class="form-control admin-notes-text" rows="3" data-feedback-id="{{ feedback.id }}">{{ feedback.admin_notes }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                    <button type="button" class="btn btn-primary save-notes-btn" data-feedback-id="{{ feedback.id }}">Guardar Notas</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /Modal -->
+                                    
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">
+                                            <div class="alert alert-info">
+                                                No hay retroalimentaciones {% if filter_status == 'pending' %}pendientes{% elif filter_status == 'approved' %}aprobadas{% endif %} para mostrar.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="pagination justify-content-center">
+                                    <nav>
+                                        <ul class="pagination">
+                                            {% if page_obj.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_status != 'all' %}&status={{ filter_status }}{% endif %}">
+                                                    <i class="fas fa-angle-left"></i>
+                                                </a>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#"><i class="fas fa-angle-left"></i></a>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {% for i in page_obj.paginator.page_range %}
+                                                {% if page_obj.number == i %}
+                                                <li class="page-item active">
+                                                    <a class="page-link" href="#">{{ i }}</a>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ i }}{% if filter_status != 'all' %}&status={{ filter_status }}{% endif %}">{{ i }}</a>
+                                                </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                            
+                                            {% if page_obj.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_status != 'all' %}&status={{ filter_status }}{% endif %}">
+                                                    <i class="fas fa-angle-right"></i>
+                                                </a>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#"><i class="fas fa-angle-right"></i></a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!-- /Pagination -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Page Content -->
+
+<!-- Modal para comentario completo -->
+<div class="modal fade" id="fullCommentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Comentario Completo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="full-comment-text"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Modal -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Mostrar comentario completo
+        $('.show-full-comment').on('click', function(e) {
+            e.preventDefault();
+            var comment = $(this).data('comment');
+            $('#full-comment-text').text(comment);
+            $('#fullCommentModal').modal('show');
+        });
+        
+        // Aprobar retroalimentación
+        $('.approve-btn').on('click', function() {
+            var feedbackId = $(this).data('feedback-id');
+            var btn = $(this);
+            
+            $.ajax({
+                url: "{% url 'feedback:approve' %}".replace('0', feedbackId),
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    // Actualizar UI
+                    var row = $('#feedback-row-' + feedbackId);
+                    row.find('.badge').removeClass('badge-warning').addClass('badge-success').text('Aprobada');
+                    
+                    // Cambiar botón
+                    btn.replaceWith('<button type="button" class="btn btn-sm btn-danger reject-btn" data-feedback-id="' + feedbackId + '"><i class="fas fa-times"></i> Rechazar</button>');
+                    
+                    // Mostrar notificación
+                    toastr.success('Retroalimentación aprobada exitosamente');
+                },
+                error: function() {
+                    toastr.error('Error al aprobar la retroalimentación');
+                }
+            });
+        });
+        
+        // Rechazar retroalimentación
+        $('.reject-btn').on('click', function() {
+            var feedbackId = $(this).data('feedback-id');
+            var btn = $(this);
+            
+            $.ajax({
+                url: "{% url 'feedback:reject' %}".replace('0', feedbackId),
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    // Actualizar UI
+                    var row = $('#feedback-row-' + feedbackId);
+                    row.find('.badge').removeClass('badge-success').addClass('badge-warning').text('Pendiente');
+                    
+                    // Cambiar botón
+                    btn.replaceWith('<button type="button" class="btn btn-sm btn-success approve-btn" data-feedback-id="' + feedbackId + '"><i class="fas fa-check"></i> Aprobar</button>');
+                    
+                    // Mostrar notificación
+                    toastr.success('Retroalimentación rechazada exitosamente');
+                },
+                error: function() {
+                    toastr.error('Error al rechazar la retroalimentación');
+                }
+            });
+        });
+        
+        // Guardar notas administrativas
+        $('.save-notes-btn').on('click', function() {
+            var feedbackId = $(this).data('feedback-id');
+            var notes = $('.admin-notes-text[data-feedback-id="' + feedbackId + '"]').val();
+            
+            $.ajax({
+                url: '/feedback/admin/save-notes/' + feedbackId + '/',
+                type: 'POST',
+                data: {
+                    'admin_notes': notes
+                },
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function() {
+                    $('#viewFeedbackModal' + feedbackId).modal('hide');
+                    toastr.success('Notas guardadas exitosamente');
+                },
+                error: function() {
+                    toastr.error('Error al guardar las notas');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    .avatar-img {
+        width: 38px;
+        height: 38px;
+        object-fit: cover;
+    }
+    .rating i {
+        color: #dedede;
+    }
+    .rating i.filled {
+        color: #f4c150;
+    }
+    .comment-excerpt {
+        max-width: 250px;
+    }
+    .feedback-comment {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+    .status-filter {
+        display: flex;
+        align-items: center;
+    }
+    .doctor-response {
+        border-left: 3px solid #20c0f3;
+        padding-left: 15px;
+    }
+</style>
+{% endblock %}

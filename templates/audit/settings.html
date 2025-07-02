@@ -1,0 +1,131 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}
+Configuración de Auditoría
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3 class="page-title">Configuración de Auditoría</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'audit:dashboard' %}">Auditoría</a></li>
+                    <li class="breadcrumb-item active">Configuración</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Page Header -->
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Configuración Global de Auditoría</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">{{ form.enabled.label }}</label>
+                            <div class="col-md-9">
+                                <div class="custom-control custom-switch">
+                                    {{ form.enabled }}
+                                    <label class="custom-control-label" for="{{ form.enabled.id_for_label }}">
+                                        {% if settings.enabled %}Habilitado{% else %}Deshabilitado{% endif %}
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted">Activa o desactiva todo el sistema de auditoría</small>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <h5>Tipos de eventos a registrar</h5>
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">{{ form.log_login_attempts.label }}</label>
+                            <div class="col-md-9">
+                                <div class="custom-control custom-switch">
+                                    {{ form.log_login_attempts }}
+                                    <label class="custom-control-label" for="{{ form.log_login_attempts.id_for_label }}"></label>
+                                </div>
+                                <small class="form-text text-muted">Registra intentos exitosos y fallidos de inicio de sesión</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">{{ form.log_data_access.label }}</label>
+                            <div class="col-md-9">
+                                <div class="custom-control custom-switch">
+                                    {{ form.log_data_access }}
+                                    <label class="custom-control-label" for="{{ form.log_data_access.id_for_label }}"></label>
+                                </div>
+                                <small class="form-text text-muted">Registra cuando los usuarios acceden a datos sensibles</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">{{ form.log_data_changes.label }}</label>
+                            <div class="col-md-9">
+                                <div class="custom-control custom-switch">
+                                    {{ form.log_data_changes }}
+                                    <label class="custom-control-label" for="{{ form.log_data_changes.id_for_label }}"></label>
+                                </div>
+                                <small class="form-text text-muted">Registra cuando se crean, modifican o eliminan datos</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">{{ form.log_critical_operations.label }}</label>
+                            <div class="col-md-9">
+                                <div class="custom-control custom-switch">
+                                    {{ form.log_critical_operations }}
+                                    <label class="custom-control-label" for="{{ form.log_critical_operations.id_for_label }}"></label>
+                                </div>
+                                <small class="form-text text-muted">Registra operaciones especialmente sensibles o críticas</small>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <h5>Retención de datos</h5>
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">{{ form.retention_days.label }}</label>
+                            <div class="col-md-9">
+                                {{ form.retention_days }}
+                                <small class="form-text text-muted">Número de días que se conservarán los registros antes de ser eliminados automáticamente</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label">Última actualización</label>
+                            <div class="col-md-9">
+                                <p class="form-control-static">
+                                    {{ settings.updated_at|date:"d/m/Y H:i:s" }} por 
+                                    {% if settings.updated_by %}
+                                        {{ settings.updated_by.get_full_name|default:settings.updated_by.username }}
+                                    {% else %}
+                                        Sistema
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fe fe-save mr-1"></i> Guardar configuración
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

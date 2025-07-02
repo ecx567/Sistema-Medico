@@ -1,0 +1,178 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Historial de Recordatorios{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="row">
+        <div class="col-sm-12">
+            <h3 class="page-title">Historial de Recordatorios</h3>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Historial de Recordatorios</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- /Page Header -->
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Filtros -->
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="form-row align-items-center">
+                    <div class="col-md-3 my-1">
+                        <label class="sr-only" for="from_date">Desde</label>
+                        <input type="date" name="from_date" id="from_date" class="form-control" 
+                               value="{{ filters.from_date|default:'' }}" placeholder="Fecha desde">
+                    </div>
+                    <div class="col-md-3 my-1">
+                        <label class="sr-only" for="to_date">Hasta</label>
+                        <input type="date" name="to_date" id="to_date" class="form-control" 
+                               value="{{ filters.to_date|default:'' }}" placeholder="Fecha hasta">
+                    </div>
+                    <div class="col-md-3 my-1">
+                        <label class="sr-only" for="status">Estado</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">Todos los estados</option>
+                            <option value="success" {% if filters.status == 'success' %}selected{% endif %}>Enviados correctamente</option>
+                            <option value="partial" {% if filters.status == 'partial' %}selected{% endif %}>Parcialmente enviados</option>
+                            <option value="failed" {% if filters.status == 'failed' %}selected{% endif %}>Fallidos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 my-1">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a href="{% url 'reminders:history' %}" class="btn btn-secondary">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Tabla de resultados -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Paciente</th>
+                                <th>Médico</th>
+                                <th>Fecha de Cita</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reminder in page_obj %}
+                            <tr>
+                                <td>#{{ reminder.id }}</td>
+                                <td>{{ reminder.sent_at|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <h2 class="table-avatar">
+                                        <a href="#" class="avatar avatar-sm mr-2">
+                                            <img class="avatar-img rounded-circle" src="{{ reminder.booking.patient.profile.image }}" alt="User Image">
+                                        </a>
+                                        <a href="#">{{ reminder.booking.patient.get_full_name }}</a>
+                                    </h2>
+                                    <span class="badge {% if reminder.sent_to_patient %}badge-success{% else %}badge-danger{% endif %}">
+                                        {% if reminder.sent_to_patient %}Enviado{% else %}No enviado{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <h2 class="table-avatar">
+                                        <a href="#" class="avatar avatar-sm mr-2">
+                                            <img class="avatar-img rounded-circle" src="{{ reminder.booking.doctor.profile.image }}" alt="User Image">
+                                        </a>
+                                        <a href="#">Dr. {{ reminder.booking.doctor.get_full_name }}</a>
+                                    </h2>
+                                    <span class="badge {% if reminder.sent_to_doctor %}badge-success{% else %}badge-danger{% endif %}">
+                                        {% if reminder.sent_to_doctor %}Enviado{% else %}No enviado{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ reminder.booking.appointment_date|date:"d/m/Y" }}
+                                    <span class="text-primary d-block">{{ reminder.booking.appointment_time|time:"H:i" }}</span>
+                                </td>
+                                <td>
+                                    {% if reminder.sent_to_patient and reminder.sent_to_doctor %}
+                                        <span class="badge badge-pill bg-success-light">Completo</span>
+                                    {% elif reminder.sent_to_patient or reminder.sent_to_doctor %}
+                                        <span class="badge badge-pill bg-warning-light">Parcial</span>
+                                    {% else %}
+                                        <span class="badge badge-pill bg-danger-light">Fallido</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'reminders:send-test' reminder.booking.id %}" class="btn btn-sm bg-info-light" 
+                                       onclick="return confirm('¿Desea enviar un recordatorio de prueba para esta cita?')">
+                                        <i class="fa fa-redo"></i> Reenviar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">No se encontraron recordatorios con los filtros seleccionados</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginación -->
+                {% if page_obj.has_other_pages %}
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <p>Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} recordatorios</p>
+                    </div>
+                    <div class="col-md-6">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-end">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

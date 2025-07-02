@@ -35,19 +35,24 @@
                         <li><a href="{% url 'accounts:admin-speciality-list' %}">Speciality List</a></li>
                     </ul>
                 </li>
-                
-                <!-- Nuevo módulo de seguridad -->
-                <li class="submenu {% if 'security' in request.path %}active{% endif %}">
-                    <a href="#"><i class="fe fe-shield"></i> <span> Security</span> <span class="menu-arrow"></span></a>
-                    <ul style="display: {% if 'security' in request.path %}block{% else %}none{% endif %};">
-                        <li {% if '/security/groups/' in request.path %}class="active"{% endif %}>
-                            <a href="{% url 'security:group-list' %}">Security Groups</a>
-                        </li>
-                        <li {% if '/security/modules/' in request.path %}class="active"{% endif %}>
-                            <a href="{% url 'security:module-list' %}">Modules</a>
-                        </li>
+
+                <!-- Informes y Análisis -->
+                {% if user.is_authenticated %}
+                <li class="submenu {% if 'reports' in request.path %}active{% endif %}">
+                    <a href="#"><i class="fe fe-bar-chart"></i> <span>Informes y Análisis</span> <span class="menu-arrow"></span></a>
+                    <ul style="display: {% if 'reports' in request.path %}block{% else %}none{% endif %};">
+                        <li><a href="{% url 'reports-dashboard' %}">Dashboard</a></li>
+                        <li><a href="{% url 'appointment-report' %}">Informe de Citas</a></li>
+                        <li><a href="{% url 'revenue-report' %}">Informe de Ingresos</a></li>
+                        {% if user.is_staff %}
+                        <li><a href="{% url 'doctor-performance-report' %}">Rendimiento de Médicos</a></li>
+                        <li><a href="{% url 'specialty-analysis' %}">Análisis de Especialidades</a></li>
+                        {% endif %}
                     </ul>
                 </li>
+                {% endif %}
+                
+
                 
                 <li>
                     <a href="{% url 'accounts:logout' %}"><i class="fe fe-logout"></i> <span>Logout</span></a>

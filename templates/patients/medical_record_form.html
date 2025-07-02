@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Editar Historial Médico" %} - {{ patient.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{% trans "Editar Historial Médico de" %} {{ patient.get_full_name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>{% trans "Grupo Sanguíneo" %}</label>
+                                    {{ form.blood_type }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>{% trans "Altura (cm)" %}</label>
+                                    {{ form.height }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>{% trans "Peso (kg)" %}</label>
+                                    {{ form.weight }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Alergias" %}</label>
+                                    {{ form.allergies }}
+                                    <small class="form-text text-muted">{{ form.allergies.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Medicamentos Actuales" %}</label>
+                                    {{ form.medications }}
+                                    <small class="form-text text-muted">{{ form.medications.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Enfermedades Crónicas" %}</label>
+                                    {{ form.chronic_diseases }}
+                                    <small class="form-text text-muted">{{ form.chronic_diseases.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Cirugías Previas" %}</label>
+                                    {{ form.previous_surgeries }}
+                                    <small class="form-text text-muted">{{ form.previous_surgeries.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Antecedentes Familiares" %}</label>
+                                    {{ form.family_history }}
+                                    <small class="form-text text-muted">{{ form.family_history.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Notas Adicionales" %}</label>
+                                    {{ form.notes }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right">
+                            <a href="{% if patient.id == request.user.id %}{% url 'patients:my_medical_record' %}{% else %}{% url 'patients:medical_record_detail' patient.id %}{% endif %}" class="btn btn-secondary">
+                                {% trans "Cancelar" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">{% trans "Guardar Cambios" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

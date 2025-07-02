@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Agregar Paciente" %}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="account-content">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-md-12 col-lg-8">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="card-title text-center">{% trans "Agregar Nuevo Paciente" %}</h3>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        
+                                        {% if form.non_field_errors %}
+                                        <div class="alert alert-danger">
+                                            {% for error in form.non_field_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.first_name.label }}</label>
+                                                    {{ form.first_name }}
+                                                    {% if form.first_name.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.first_name.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.last_name.label }}</label>
+                                                    {{ form.last_name }}
+                                                    {% if form.last_name.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.last_name.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>{{ form.email.label }}</label>
+                                            {{ form.email }}
+                                            {% if form.email.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.email.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.password.label }}</label>
+                                                    {{ form.password }}
+                                                    {% if form.password.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.password.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.confirm_password.label }}</label>
+                                                    {{ form.confirm_password }}
+                                                    {% if form.confirm_password.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.confirm_password.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.phone.label }}</label>
+                                                    {{ form.phone }}
+                                                    {% if form.phone.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.phone.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.gender.label }}</label>
+                                                    {{ form.gender }}
+                                                    {% if form.gender.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.gender.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.blood_group.label }}</label>
+                                                    {{ form.blood_group }}
+                                                    {% if form.blood_group.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.blood_group.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{{ form.dob.label }}</label>
+                                                    {{ form.dob }}
+                                                    {% if form.dob.errors %}
+                                                    <div class="text-danger">
+                                                        {% for error in form.dob.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>{{ form.address.label }}</label>
+                                            {{ form.address }}
+                                            {% if form.address.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.address.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group text-center">
+                                            <button type="submit" class="btn btn-primary btn-lg">{% trans "Crear Paciente" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+{{ block.super }}
+<style>
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], 
+    input[type="date"], select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .text-danger {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}

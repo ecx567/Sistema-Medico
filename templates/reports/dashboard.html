@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Análisis{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="text-center mb-4">Dashboard de Análisis</h2>
+    
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Desde:</label>
+                        <input type="date" id="start_date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Hasta:</label>
+                        <input type="date" id="end_date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Especialidad:</label>
+                        <select id="specialty" class="form-control">
+                            <option value="">Todas</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button id="filter-btn" class="btn btn-primary">Aplicar Filtros</button>
+                    <button id="save-dashboard-btn" class="btn btn-outline-secondary ml-2">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Indicadores KPI -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total de Citas</h5>
+                    <h2 id="kpi-total-appointments">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Completadas</h5>
+                    <h2 id="kpi-completed-appointments">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Ingresos Totales</h5>
+                    <h2 id="kpi-total-revenue">$0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tasa de Completitud</h5>
+                    <h2 id="kpi-completion-rate">0%</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Citas por Mes</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="appointments-chart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Ingresos por Mes</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenue-chart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Citas por Especialidad</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="specialty-chart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Top Médicos por Ingresos</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="doctors-revenue-chart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para guardar dashboard -->
+<div class="modal fade" id="saveDashboardModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Guardar Dashboard</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nombre del Dashboard:</label>
+                    <input type="text" class="form-control" id="dashboard-name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirm-save-dashboard">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    // Inicialización de variables
+    let appointmentsChart, revenueChart, specialtyChart, doctorsRevenueChart;
+    const charts = {};
+    
+    // Al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Establecer fechas por defecto (último mes)
+        const today = new Date();
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(today.getMonth() - 1);
+        
+        document.getElementById('start_date').valueAsDate = lastMonth;
+        document.getElementById('end_date').valueAsDate = today;
+        
+        // Cargar datos iniciales
+        loadDashboardData();
+        
+        // Configurar eventos
+        document.getElementById('filter-btn').addEventListener('click', loadDashboardData);
+        document.getElementById('save-dashboard-btn').addEventListener('click', function() {
+            $('#saveDashboardModal').modal('show');
+        });
+        
+        document.getElementById('confirm-save-dashboard').addEventListener('click', saveDashboard);
+    });
+    
+    // Cargar datos del dashboard
+    function loadDashboardData() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const specialty = document.getElementById('specialty').value;
+        
+        // Cargar datos de citas
+        fetch(`/reports/api/stats/appointments/?start_date=${startDate}&end_date=${endDate}&specialty=${specialty}`)
+            .then(response => response.json())
+            .then(data => {
+                updateAppointmentsKPIs(data);
+                updateAppointmentsChart(data);
+                updateSpecialtyChart(data);
+            });
+        
+        // Cargar datos de ingresos
+        fetch(`/reports/api/stats/revenue/?start_date=${startDate}&end_date=${endDate}&by_doctor=true`)
+            .then(response => response.json())
+            .then(data => {
+                updateRevenueKPIs(data);
+                updateRevenueChart(data);
+                updateDoctorsRevenueChart(data);
+            });
+    }
+    
+    // Actualizar KPIs de citas
+    function updateAppointmentsKPIs(data) {
+        document.getElementById('kpi-total-appointments').textContent = data.total;
+        document.getElementById('kpi-completed-appointments').textContent = data.completed;
+        document.getElementById('kpi-completion-rate').textContent = `${data.completion_rate.toFixed(1)}%`;
+    }
+    
+    // Actualizar KPIs de ingresos
+    function updateRevenueKPIs(data) {
+        document.getElementById('kpi-total-revenue').textContent = `$${data.total_revenue.toFixed(2)}`;
+    }
+    
+    // Gráfico de citas por mes
+    function updateAppointmentsChart(data) {
+        const ctx = document.getElementById('appointments-chart').getContext('2d');
+        
+        // Preparar datos
+        const labels = data.by_month.map(item => {
+            const date = new Date(item.month);
+            return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+        });
+        
+        const datasets = [{
+            label: 'Citas',
+            data: data.by_month.map(item => item.count),
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgb(54, 162, 235)',
+            borderWidth: 1
+        }];
+        
+        // Crear o actualizar gráfico
+        if (charts.appointments) {
+            charts.appointments.data.labels = labels;
+            charts.appointments.data.datasets = datasets;
+            charts.appointments.update();
+        } else {
+            charts.appointments = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
+                    }
+                }
+            });
+        }
+    }
+    
+    // Implementación similar para los otros gráficos...
+    
+    // Guardar dashboard
+    function saveDashboard() {
+        const name = document.getElementById('dashboard-name').value;
+        if (!name) {
+            alert('Por favor, ingresa un nombre para el dashboard');
+            return;
+        }
+        
+        const configuration = {
+            filters: {
+                startDate: document.getElementById('start_date').value,
+                endDate: document.getElementById('end_date').value,
+                specialty: document.getElementById('specialty').value
+            }
+        };
+        
+        fetch('/reports/api/saved-dashboards/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ name, configuration })
+        })
+        .then(response => {
+            if (response.ok) {
+                $('#saveDashboardModal').modal('hide');
+                alert('Dashboard guardado correctamente');
+            } else {
+                alert('Error al guardar el dashboard');
+            }
+        });
+    }
+    
+    // Función auxiliar para obtener valor de cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

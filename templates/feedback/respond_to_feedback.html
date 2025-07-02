@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'feedback:doctor-feedbacks' %}">Mis Retroalimentaciones</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Responder</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Responder a Retroalimentación</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Retroalimentación del Paciente</h4>
+                        
+                        <div class="feedback-details mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ feedback.patient.profile.image.url|default:'static/img/default-avatar.jpg' }}" 
+                                     class="img-fluid rounded-circle" width="50" alt="Paciente">
+                                <div class="ml-3">
+                                    <h5 class="mb-0">{{ feedback.patient.get_full_name }}</h5>
+                                    <div class="rating">
+                                        {% for i in "12345" %}
+                                            <i class="fas fa-star {% if forloop.counter <= feedback.rating %}filled{% endif %}"></i>
+                                        {% endfor %}
+                                        <span class="ml-1 text-muted">({{ feedback.rating }})</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if feedback.comment %}
+                                <div class="feedback-comment p-3 bg-light rounded mb-3">
+                                    {{ feedback.comment }}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">El paciente no dejó comentarios.</p>
+                            {% endif %}
+                            
+                            <div class="text-muted">
+                                <small>Fecha de cita: {{ feedback.booking.appointment_date|date:"d/m/Y" }}</small><br>
+                                <small>Retroalimentación enviada: {{ feedback.created_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </div>
+                        
+                        <h4 class="card-title">Tu Respuesta</h4>
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                {{ form.response_text.label_tag }}
+                                {{ form.response_text }}
+                                {% if form.response_text.errors %}
+                                    <div class="text-danger">
+                                        {{ form.response_text.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="submit-section">
+                                <button type="submit" class="btn btn-primary submit-btn">Enviar Respuesta</button>
+                                <a href="{% url 'feedback:doctor-feedbacks' %}" class="btn btn-secondary submit-btn">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

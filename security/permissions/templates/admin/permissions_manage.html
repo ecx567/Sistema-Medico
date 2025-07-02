@@ -1,0 +1,196 @@
+{% extends "admin/base_site.html" %}
+{% load permission_filters %}
+
+{% block extrastyle %}
+<style>
+    .permission-section {
+        margin: 20px 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .instruction-box {
+        background-color: #e7f3fe;
+        border-left: 6px solid #2196F3;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .step {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        text-align: center;
+        background-color: #2196F3;
+        color: white;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .permission-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .permission-table th, .permission-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    
+    .permission-table th {
+        background-color: #f5f5f5;
+    }
+    
+    .btn-group {
+        margin: 10px 0;
+    }
+    
+    .btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    
+    .btn-primary {
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    .btn-danger {
+        background-color: #f44336;
+        color: white;
+    }
+    
+    .btn-success {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Gestión de Permisos</h1>
+
+<div class="instruction-box">
+    <p><span class="step">1</span> Selecciona un grupo del primer selector</p>
+    <p><span class="step">2</span> Elige un módulo para ver y configurar sus permisos</p>
+    <p><span class="step">3</span> Marca los permisos que deseas asignar al grupo para ese módulo</p>
+    <p><span class="step">4</span> Haz clic en "Guardar" para aplicar los cambios</p>
+</div>
+
+<div class="permission-section">
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <form method="get" action="">
+                <h3>1. Seleccione un Grupo</h3>
+                <select name="group" onchange="this.form.submit()" style="width: 100%; padding: 8px;">
+                    <option value="">Seleccione un grupo</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}" {% if selected_group.id == group.id %}selected{% endif %}>
+                        {{ group.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        
+        <div style="flex: 1;">
+            <form method="get" action="">
+                {% if selected_group %}
+                <input type="hidden" name="group" value="{{ selected_group.id }}">
+                {% endif %}
+                <h3>2. Seleccione un Módulo</h3>
+                <select name="module" onchange="this.form.submit()" style="width: 100%; padding: 8px;" {% if not selected_group %}disabled{% endif %}>
+                    <option value="">Seleccione un módulo</option>
+                    {% for module in modules %}
+                    <option value="{{ module.id }}" {% if selected_module.id == module.id %}selected{% endif %}>
+                        {{ module.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if selected_group and selected_module %}
+<div class="permission-section">
+    <h3>3. Configure Permisos</h3>
+    
+    {% if has_permissions %}
+    <form method="post" action="">
+        {% csrf_token %}
+        <input type="hidden" name="group" value="{{ selected_group.id }}">
+        <input type="hidden" name="module" value="{{ selected_module.id }}">
+        
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" id="selectAllBtn">Seleccionar Todos</button>
+            <button type="button" class="btn btn-danger" id="deselectAllBtn">Deseleccionar Todos</button>
+        </div>
+        
+        <table class="permission-table">
+            <thead>
+                <tr>
+                    <th>Permiso</th>
+                    <th>Estado</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for perm in permissions %}
+                <tr>
+                    <td>{{ perm.name }}</td>
+                    <td style="text-align: center;">
+                        <input type="checkbox" 
+                               class="permission-checkbox" 
+                               id="perm_{{ perm.id }}" 
+                               name="perm_{{ perm.id }}"
+                               {% if permissions_data|get_item:perm.id|get_item:'is_active' %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <small>{{ perm.description }}</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 15px; text-align: right;">
+            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+        </div>
+    </form>
+    {% else %}
+    <p style="text-align: center; padding: 20px; color: #666;">
+        No hay permisos disponibles para este módulo
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const deselectAllBtn = document.getElementById('deselectAllBtn');
+    
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+    }
+    
+    if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', function() {
+            document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

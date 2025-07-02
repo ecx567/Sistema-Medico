@@ -1,0 +1,137 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Configuración de Recordatorios{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="row">
+        <div class="col-sm-12">
+            <h3 class="page-title">Configuración de Recordatorios</h3>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Configuración de Recordatorios</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- /Page Header -->
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Configuración Global de Recordatorios</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Estado</label>
+                        <div class="col-md-9">
+                            <div class="custom-control custom-switch">
+                                {{ form.enabled }}
+                                <label class="custom-control-label" for="{{ form.enabled.id_for_label }}">
+                                    {% if config.enabled %}Activado{% else %}Desactivado{% endif %}
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Habilitar o deshabilitar el envío de recordatorios</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Horas de anticipación</label>
+                        <div class="col-md-9">
+                            {{ form.hours_before }}
+                            <small class="form-text text-muted">Cuántas horas antes de la cita se enviará el recordatorio</small>
+                            {% if form.hours_before.errors %}
+                                <div class="alert alert-danger">{{ form.hours_before.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Asunto del email</label>
+                        <div class="col-md-9">
+                            {{ form.email_subject }}
+                            {% if form.email_subject.errors %}
+                                <div class="alert alert-danger">{{ form.email_subject.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Plantilla para Pacientes</label>
+                        <div class="col-md-9">
+                            {{ form.email_template_patient }}
+                            <small class="form-text text-muted">
+                                Variables disponibles: {patient_name}, {doctor_name}, {appointment_date}, {appointment_time}
+                            </small>
+                            {% if form.email_template_patient.errors %}
+                                <div class="alert alert-danger">{{ form.email_template_patient.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Plantilla para Médicos</label>
+                        <div class="col-md-9">
+                            {{ form.email_template_doctor }}
+                            <small class="form-text text-muted">
+                                Variables disponibles: {patient_name}, {doctor_name}, {appointment_date}, {appointment_time}
+                            </small>
+                            {% if form.email_template_doctor.errors %}
+                                <div class="alert alert-danger">{{ form.email_template_doctor.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <div class="col-md-9 offset-md-3">
+                            <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Información</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>Cómo funcionan los recordatorios</h5>
+                    <p>
+                        El sistema envía recordatorios automáticos a pacientes y médicos antes de sus citas programadas.
+                        La configuración actual enviará recordatorios <strong>{{ config.hours_before }} horas</strong> antes 
+                        de cada cita.
+                    </p>
+                    <p>
+                        Para que los recordatorios se envíen automáticamente, es necesario configurar una tarea 
+                        programada que ejecute el siguiente comando:
+                    </p>
+                    <pre class="bg-light p-3">python manage.py send_appointment_reminders</pre>
+                    <p>
+                        Este comando debe ejecutarse regularmente (por ejemplo, cada hora) mediante:
+                    </p>
+                    <ul>
+                        <li>En Linux/Mac: Un cron job</li>
+                        <li>En Windows: El Programador de tareas</li>
+                    </ul>
+                    <p>
+                        <a href="{% url 'reminders:history' %}" class="btn btn-sm btn-primary">
+                            Ver historial de recordatorios
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

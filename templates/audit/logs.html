@@ -1,0 +1,193 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}
+Registros de Auditoría
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title">Registros de Auditoría</h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'audit:dashboard' %}">Auditoría</a></li>
+                    <li class="breadcrumb-item active">Registros</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Page Header -->
+    
+    <!-- Filtros -->
+    <div class="card">
+        <div class="card-body">
+            <form method="get" class="form">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ filter_form.start_date.label }}</label>
+                            {{ filter_form.start_date }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ filter_form.end_date.label }}</label>
+                            {{ filter_form.end_date }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ filter_form.event_type.label }}</label>
+                            {{ filter_form.event_type }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ filter_form.object_category.label }}</label>
+                            {{ filter_form.object_category }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ filter_form.criticality.label }}</label>
+                            {{ filter_form.criticality }}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>{{ filter_form.user.label }}</label>
+                            {{ filter_form.user }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>{{ filter_form.search.label }}</label>
+                            {{ filter_form.search }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group" style="margin-top: 28px;">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fe fe-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- /Filtros -->
+    
+    <!-- Resultados -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-table">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Usuario</th>
+                                    <th>Tipo</th>
+                                    <th>Categoría</th>
+                                    <th>Objeto</th>
+                                    <th>Acción</th>
+                                    <th>Criticidad</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in page_obj %}
+                                <tr>
+                                    <td>{{ log.timestamp|date:"d/m/Y H:i:s" }}</td>
+                                    <td>
+                                        {% if log.user %}
+                                            {{ log.user.get_full_name|default:log.user.username }}
+                                        {% else %}
+                                            Sistema
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ log.get_event_type_display }}</td>
+                                    <td>{{ log.get_object_category_display }}</td>
+                                    <td>{{ log.object_repr }}</td>
+                                    <td>{{ log.action }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if log.criticality == 'info' %}badge-info{% endif %}
+                                            {% if log.criticality == 'warning' %}badge-warning{% endif %}
+                                            {% if log.criticality == 'error' %}badge-danger{% endif %}
+                                            {% if log.criticality == 'critical' %}badge-dark{% endif %}">
+                                            {{ log.get_criticality_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ log.ip_address|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No se encontraron registros con los criterios seleccionados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Paginación -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="card-footer">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Primera">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Última">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                <!-- /Paginación -->
+            </div>
+        </div>
+    </div>
+    <!-- /Resultados -->
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Historial Médico" %} - {{ patient.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        {% trans "Historial Médico de" %} {{ patient.get_full_name }}
+                        {% if request.user.is_doctor or is_own_record %}
+                            <a href="{% url 'patients:medical_record_edit' patient.id %}" class="btn btn-sm btn-primary float-right">
+                                <i class="fa fa-edit"></i> {% trans "Editar" %}
+                            </a>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Información básica -->
+                        <div class="col-md-6">
+                            <h5>{% trans "Información Básica" %}</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>{% trans "Grupo Sanguíneo" %}</th>
+                                    <td>{{ medical_record.blood_type|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Altura" %}</th>
+                                    <td>{{ medical_record.height|default:"-" }} cm</td>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Peso" %}</th>
+                                    <td>{{ medical_record.weight|default:"-" }} kg</td>
+                                </tr>
+                                {% if medical_record.get_bmi %}
+                                <tr>
+                                    <th>{% trans "IMC" %}</th>
+                                    <td>{{ medical_record.get_bmi }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        
+                        <!-- Información médica -->
+                        <div class="col-md-6">
+                            <h5>{% trans "Alergias" %}</h5>
+                            <p>{{ medical_record.allergies|default:"-"|linebreaks }}</p>
+                            
+                            <h5>{% trans "Medicamentos Actuales" %}</h5>
+                            <p>{{ medical_record.medications|default:"-"|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5>{% trans "Enfermedades Crónicas" %}</h5>
+                            <p>{{ medical_record.chronic_diseases|default:"-"|linebreaks }}</p>
+                            
+                            <h5>{% trans "Cirugías Previas" %}</h5>
+                            <p>{{ medical_record.previous_surgeries|default:"-"|linebreaks }}</p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>{% trans "Antecedentes Familiares" %}</h5>
+                            <p>{{ medical_record.family_history|default:"-"|linebreaks }}</p>
+                            
+                            <h5>{% trans "Notas Adicionales" %}</h5>
+                            <p>{{ medical_record.notes|default:"-"|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Diagnósticos -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>
+                                {% trans "Diagnósticos" %}
+                                {% if request.user.is_doctor %}
+                                <a href="{% url 'patients:diagnosis_create' patient.id %}" class="btn btn-sm btn-primary float-right">
+                                    <i class="fa fa-plus"></i> {% trans "Agregar Diagnóstico" %}
+                                </a>
+                                {% endif %}
+                            </h5>
+                            
+                            {% if diagnoses %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans "Fecha" %}</th>
+                                            <th>{% trans "Diagnóstico" %}</th>
+                                            <th>{% trans "Médico" %}</th>
+                                            <th>{% trans "Tratamiento" %}</th>
+                                            {% if request.user.is_doctor %}
+                                            <th>{% trans "Acciones" %}</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for diagnosis in diagnoses %}
+                                        <tr>
+                                            <td>{{ diagnosis.diagnosis_date }}</td>
+                                            <td>{{ diagnosis.diagnosis }}</td>
+                                            <td>{{ diagnosis.doctor.get_full_name }}</td>
+                                            <td>{{ diagnosis.treatment|truncatewords:10 }}</td>
+                                            {% if request.user.is_doctor and request.user == diagnosis.doctor %}
+                                            <td>
+                                                <a href="{% url 'patients:diagnosis_edit' diagnosis.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p>{% trans "No hay diagnósticos registrados." %}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <small>{% trans "Última actualización" %}: {{ medical_record.updated_at }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

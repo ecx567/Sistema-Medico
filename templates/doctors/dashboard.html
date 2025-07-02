@@ -1,10 +1,11 @@
 {% extends 'includes/doctor-sidebar.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block page_name1 %}Dashboard{% endblock %}
-{% block page_name2 %}Doctor Dashboard{% endblock %}
+{% block page_name2 %}{% trans "Doctor Dashboard" %}{% endblock %}
 
-{% block title %}Doctor Dashboard{% endblock %}
+{% block title %}{% trans "Doctor Dashboard" %}{% endblock %}
 
 {% block main %}
     <div class="row">
@@ -20,9 +21,9 @@
                                     </div>
                                 </div>
                                 <div class="dash-widget-info">
-                                    <h6>Total Patients</h6>
+                                    <h6>{% trans "Total Patients" %}</h6>
                                     <h3>{{ total_patients }}</h3>
-                                    <p class="text-muted">Till Today</p>
+                                    <p class="text-muted">{% trans "Till Today" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -35,7 +36,7 @@
                                     </div>
                                 </div>
                                 <div class="dash-widget-info">
-                                    <h6>Today Patients</h6>
+                                    <h6>{% trans "Today Patients" %}</h6>
                                     <h3>{{ today_patients }}</h3>
                                     <p class="text-muted">{{ today|date:"d M Y" }}</p>
                                 </div>
@@ -50,9 +51,9 @@
                                     </div>
                                 </div>
                                 <div class="dash-widget-info">
-                                    <h6>Total Appointments</h6>
+                                    <h6>{% trans "Total Appointments" %}</h6>
                                     <h3>{{ total_appointments }}</h3>
-                                    <p class="text-muted">Till Today</p>
+                                    <p class="text-muted">{% trans "Till Today" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -64,15 +65,15 @@
 
     <div class="row">
         <div class="col-md-12">
-            <h4 class="mb-4">Patient Appointments</h4>
+            <h4 class="mb-4">{% trans "Patient Appointments" %}</h4>
             <div class="appointment-tab">
                 <!-- Appointment Tab -->
                 <ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#upcoming-appointments" data-toggle="tab">Upcoming</a>
+                        <a class="nav-link active" href="#upcoming-appointments" data-toggle="tab">{% trans "Upcoming" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#today-appointments" data-toggle="tab">Today</a>
+                        <a class="nav-link" href="#today-appointments" data-toggle="tab">{% trans "Today" %}</a>
                     </li>
                 </ul>
                 <!-- /Appointment Tab -->
@@ -86,11 +87,11 @@
                                     <table class="table table-hover table-center mb-0">
                                         <thead>
                                             <tr>
-                                                <th>Patient Name</th>
-                                                <th>Appointment Date</th>
-                                                <th>Status</th>
-                                                <th class="text-center">Amount</th>
-                                                <th>Actions</th>
+                                                <th>{% trans "Patient Name" %}</th>
+                                                <th>{% trans "Appointment Date" %}</th>
+                                                <th>{% trans "Status" %}</th>
+                                                <th class="text-center">{% trans "Amount" %}</th>
+                                                <th>{% trans "Actions" %}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -121,19 +122,25 @@
                                                 <td>
                                                     <div class="table-action">
                                                         <a href="{% url 'doctors:appointment-detail' appointment.pk %}" class="btn btn-sm bg-info-light">
-                                                            <i class="far fa-eye"></i> View
+                                                            <i class="far fa-eye"></i> {% trans "View" %}
                                                         </a>
+                                                        
+                                                        <!-- Añadir esto en la lista de acciones para cada paciente -->
+                                                        <a href="{% url 'patients:medical_record_detail' appointment.patient.id %}" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-heartbeat"></i> {% trans "Historial Médico" %}
+                                                        </a>
+                                                        
                                                         {% if appointment.status == 'pending' %}
                                                             <form method="post" action="{% url 'doctors:appointment-action' appointment.pk 'accept' %}" style="display: inline;">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-sm bg-success-light" onclick="return confirm('Are you sure you want to accept this appointment?')">
-                                                                    <i class="fas fa-check"></i> Accept
+                                                                <button type="submit" class="btn btn-sm bg-success-light" onclick="return confirm('{% trans "Are you sure you want to accept this appointment?" %}')">
+                                                                    <i class="fas fa-check"></i> {% trans "Accept" %}
                                                                 </button>
                                                             </form>
                                                             <form method="post" action="{% url 'doctors:appointment-action' appointment.pk 'cancel' %}" style="display: inline;">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                                    <i class="fas fa-times"></i> Cancel
+                                                                <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('{% trans "Are you sure you want to cancel this appointment?" %}')">
+                                                                    <i class="fas fa-times"></i> {% trans "Cancel" %}
                                                                 </button>
                                                             </form>
                                                         {% endif %}
@@ -142,7 +149,7 @@
                                             </tr>
                                             {% empty %}
                                             <tr>
-                                                <td colspan="5" class="text-center">No upcoming appointments</td>
+                                                <td colspan="5" class="text-center">{% trans "No upcoming appointments" %}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -161,11 +168,11 @@
                                     <table class="table table-hover table-center mb-0">
                                         <thead>
                                             <tr>
-                                                <th>Patient Name</th>
-                                                <th>Appointment Time</th>
-                                                <th>Status</th>
-                                                <th class="text-center">Amount</th>
-                                                <th>Actions</th>
+                                                <th>{% trans "Patient Name" %}</th>
+                                                <th>{% trans "Appointment Time" %}</th>
+                                                <th>{% trans "Status" %}</th>
+                                                <th class="text-center">{% trans "Amount" %}</th>
+                                                <th>{% trans "Actions" %}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -195,19 +202,25 @@
                                                 <td class="text-right">
                                                     <div class="table-action">
                                                         <a href="{% url 'doctors:appointment-detail' appointment.pk %}" class="btn btn-sm bg-info-light">
-                                                            <i class="far fa-eye"></i> View
+                                                            <i class="far fa-eye"></i> {% trans "View" %}
                                                         </a>
+                                                        
+                                                        <!-- Añadir esto en la lista de acciones para cada paciente -->
+                                                        <a href="{% url 'patients:medical_record_detail' appointment.patient.id %}" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-heartbeat"></i> {% trans "Historial Médico" %}
+                                                        </a>
+                                                        
                                                         {% if appointment.status == 'pending' %}
                                                             <form method="post" action="{% url 'doctors:appointment-action' appointment.pk 'accept' %}" style="display: inline;">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-sm bg-success-light" onclick="return confirm('Are you sure you want to accept this appointment?')">
-                                                                    <i class="fas fa-check"></i> Accept
+                                                                <button type="submit" class="btn btn-sm bg-success-light" onclick="return confirm('{% trans "Are you sure you want to accept this appointment?" %}')">
+                                                                    <i class="fas fa-check"></i> {% trans "Accept" %}
                                                                 </button>
                                                             </form>
                                                             <form method="post" action="{% url 'doctors:appointment-action' appointment.pk 'cancel' %}" style="display: inline;">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                                    <i class="fas fa-times"></i> Cancel
+                                                                <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('{% trans "Are you sure you want to cancel this appointment?" %}')">
+                                                                    <i class="fas fa-times"></i> {% trans "Cancel" %}
                                                                 </button>
                                                             </form>
                                                         {% endif %}
@@ -216,7 +229,7 @@
                                             </tr>
                                             {% empty %}
                                             <tr>
-                                                <td colspan="5" class="text-center">No appointments for today</td>
+                                                <td colspan="5" class="text-center">{% trans "No appointments for today" %}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -235,17 +248,17 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Recent Prescriptions</h4>
+                    <h4 class="card-title">{% trans "Recent Prescriptions" %}</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover table-center mb-0">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Patient</th>
-                                    <th>Diagnosis</th>
-                                    <th>Action</th>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Patient" %}</th>
+                                    <th>{% trans "Diagnosis" %}</th>
+                                    <th>{% trans "Action" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -262,14 +275,21 @@
                                     </td>
                                     <td>{{ prescription.diagnosis|truncatechars:50 }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-sm bg-info-light">
-                                            <i class="far fa-eye"></i> View
-                                        </a>
+                                        <div class="table-action">
+                                            <a href="#" class="btn btn-sm bg-info-light">
+                                                <i class="far fa-eye"></i> {% trans "View" %}
+                                            </a>
+                                            
+                                            <!-- Añadir esto en la lista de acciones para cada paciente -->
+                                            <a href="{% url 'patients:medical_record_detail' prescription.patient.id %}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-heartbeat"></i> {% trans "Historial Médico" %}
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center">No prescriptions found</td>
+                                    <td colspan="4" class="text-center">{% trans "No prescriptions found" %}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

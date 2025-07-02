@@ -4,6 +4,14 @@ from ckeditor5.fields import RichTextField
 
 
 class Booking(models.Model):
+    """Modelo para gestionar citas médicas"""
+    STATUS_CHOICES = (
+        ('pending', 'Pendiente'),
+        ('confirmed', 'Confirmada'),
+        ('cancelled', 'Cancelada'),
+        ('completed', 'Completada'),
+        ('no_show', 'No Show'),
+    )
     doctor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -21,19 +29,23 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=20,
-        choices=[
-            ("pending", "Pending"),
-            ("confirmed", "Confirmed"),
-            ("completed", "Completed"),
-            ("cancelled", "Cancelled"),
-            ("no_show", "No Show"),
-        ],
+        choices=STATUS_CHOICES,
         default="pending",
     )
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Cita: {self.patient.username} con {self.doctor.username} el {self.appointment_date}"
+    
+    def has_reminder(self):
+        """Verifica si la cita tiene recordatorios enviados"""
+        return hasattr(self, 'reminders') and self.reminders.exists()
 
     class Meta:
         ordering = ["-appointment_date", "-appointment_time"]
         # Ensure no double bookings for same doctor at same time
+        verbose_name = "Cita"
+        verbose_name_plural = "Citas"
         unique_together = ["doctor", "appointment_date", "appointment_time"]
 
     def __str__(self):
