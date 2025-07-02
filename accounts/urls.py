@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views.common_views import *
+from accounts.views.quick_add_views import QuickAddPatientView, QuickAddDoctorView
 
 app_name = "accounts"
 
@@ -22,4 +23,8 @@ urlpatterns = [
         UpdateBasicUserInformationAPIView.as_view(),
         name="update-basic-information",
     ),
+
+    # Agregar estas URLs en el urlpatterns existente:
+    path('quick-add-patient/', QuickAddPatientView.as_view(), name='quick-add-patient'),
+    path('quick-add-doctor/', QuickAddDoctorView.as_view(), name='quick-add-doctor'),
 ]

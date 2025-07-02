@@ -125,3 +125,172 @@ class UserLoginForm(forms.Form):
 
     def get_user(self):
         return self.user
+
+
+
+#########
+
+
+# Agregar al final del archivo
+
+class QuickPatientRegistrationForm(forms.ModelForm):
+    """Formulario simplificado para registro rápido de pacientes"""
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre"}),
+        max_length=30,
+        required=True,
+    )
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Apellido"}),
+        max_length=30,
+        required=True,
+    )
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre de usuario"}),
+        max_length=30,
+        required=True,
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Correo Electrónico"}),
+        max_length=255,
+        required=True,
+    )
+    phone_number = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Número de teléfono"}),
+        max_length=15,
+        required=False,
+    )
+    address = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Dirección"}),
+        max_length=255,
+        required=False,
+    )
+    city = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Ciudad"}),
+        max_length=100,
+        required=False,
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Contraseña"}),
+        required=True,
+    )
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "username", "email", "password"]
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Este nombre de usuario ya está en uso")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo electrónico ya está registrado")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        user.role = "patient"
+        
+        if commit:
+            user.save()
+            # Crear o actualizar perfil
+            profile, created = user.profile, False
+            if hasattr(user, 'profile'):
+                profile = user.profile
+            else:
+                from accounts.models import Profile
+                profile = Profile(user=user)
+                
+            profile.phone = self.cleaned_data.get("phone_number", "")
+            profile.address = self.cleaned_data.get("address", "")
+            profile.city = self.cleaned_data.get("city", "")
+            profile.save()
+            
+        return user
+
+
+class QuickDoctorRegistrationForm(forms.ModelForm):
+    """Formulario simplificado para registro rápido de médicos"""
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre"}),
+        max_length=30,
+        required=True,
+    )
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Apellido"}),
+        max_length=30,
+        required=True,
+    )
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre de usuario"}),
+        max_length=30,
+        required=True,
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Correo Electrónico"}),
+        max_length=255,
+        required=True,
+    )
+    specialization = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Especialización"}),
+        max_length=100,
+        required=True,
+    )
+    phone_number = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Número de teléfono"}),
+        max_length=15,
+        required=False,
+    )
+    price_per_consultation = forms.DecimalField(
+        widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "Precio por consulta"}),
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Contraseña"}),
+        required=True,
+    )
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "username", "email", "password"]
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Este nombre de usuario ya está en uso")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo electrónico ya está registrado")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        user.role = "doctor"
+        
+        if commit:
+            user.save()
+            # Crear o actualizar perfil
+            profile, created = user.profile, False
+            if hasattr(user, 'profile'):
+                profile = user.profile
+            else:
+                from accounts.models import Profile
+                profile = Profile(user=user)
+                
+            profile.specialization = self.cleaned_data.get("specialization", "")
+            profile.phone = self.cleaned_data.get("phone_number", "")
+            profile.price_per_consultation = self.cleaned_data.get("price_per_consultation", 0)
+            profile.save()
+            
+        return user

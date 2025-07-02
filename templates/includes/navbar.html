@@ -50,7 +50,27 @@
                     </li>
                     
                 {% endif %}
-                
+                <!-- Nuevo menú Agregar -->
+                 {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus-circle"></i> Agregar
+                    </a>
+                    <div class="dropdown-menu">
+                        {% if user.is_staff or user.role == 'patient' %}
+                        <a class="dropdown-item" href="{% url 'accounts:quick-add-patient' %}">
+                            <i class="fas fa-user"></i> Agregar Paciente
+                        </a>
+                        {% endif %}
+                        
+                        {% if user.is_staff or user.role == 'doctor' %}
+                        <a class="dropdown-item" href="{% url 'accounts:quick-add-doctor' %}">
+                            <i class="fas fa-user-md"></i> Agregar Doctor
+                        </a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endif %}
                 
                 
             </ul>

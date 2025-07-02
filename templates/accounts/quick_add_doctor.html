@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Agregar Doctor Rápido" %}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="account-content">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-md-12 col-lg-8">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="card-title text-center">{% trans "Agregar Nuevo Doctor" %}</h3>
+                                    <p class="text-center text-muted">Complete el formulario para registrar rápidamente un nuevo doctor</p>
+                                    
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        
+                                        {% if form.non_field_errors %}
+                                        <div class="alert alert-danger">
+                                            {% for error in form.non_field_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <!-- Datos Personales -->
+                                        <h4 class="mt-3">{% trans "Datos Personales" %}</h4>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{% trans "Nombre" %} <span class="text-danger">*</span></label>
+                                                    {{ form.first_name }}
+                                                    {% if form.first_name.errors %}
+                                                    <div class="text-danger">{{ form.first_name.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{% trans "Apellido" %} <span class="text-danger">*</span></label>
+                                                    {{ form.last_name }}
+                                                    {% if form.last_name.errors %}
+                                                    <div class="text-danger">{{ form.last_name.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Datos Profesionales -->
+                                        <h4 class="mt-3">{% trans "Datos Profesionales" %}</h4>
+                                        <div class="form-group">
+                                            <label>{% trans "Especialización" %} <span class="text-danger">*</span></label>
+                                            {{ form.specialization }}
+                                            {% if form.specialization.errors %}
+                                            <div class="text-danger">{{ form.specialization.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>{% trans "Precio por Consulta" %}</label>
+                                            {{ form.price_per_consultation }}
+                                            {% if form.price_per_consultation.errors %}
+                                            <div class="text-danger">{{ form.price_per_consultation.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Datos de Contacto -->
+                                        <h4 class="mt-3">{% trans "Datos de Contacto" %}</h4>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{% trans "Correo Electrónico" %} <span class="text-danger">*</span></label>
+                                                    {{ form.email }}
+                                                    {% if form.email.errors %}
+                                                    <div class="text-danger">{{ form.email.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>{% trans "Teléfono" %}</label>
+                                                    {{ form.phone_number }}
+                                                    {% if form.phone_number.errors %}
+                                                    <div class="text-danger">{{ form.phone_number.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Datos de Acceso -->
+                                        <h4 class="mt-3">{% trans "Datos de Acceso" %}</h4>
+                                        <div class="form-group">
+                                            <label>{% trans "Nombre de Usuario" %} <span class="text-danger">*</span></label>
+                                            {{ form.username }}
+                                            {% if form.username.errors %}
+                                            <div class="text-danger">{{ form.username.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>{% trans "Contraseña" %} <span class="text-danger">*</span></label>
+                                            {{ form.password }}
+                                            {% if form.password.errors %}
+                                            <div class="text-danger">{{ form.password.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="form-group text-center">
+                                            <button class="btn btn-primary btn-block" type="submit">
+                                                {% trans "Registrar Doctor" %}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
