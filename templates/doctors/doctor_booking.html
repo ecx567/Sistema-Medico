@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agendar Cita con Dr. {{ doctor.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Agendar Cita</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Agendar Cita con Dr. {{ doctor.get_full_name }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <!-- Información del Doctor -->
+            <div class="col-md-4 col-lg-4 col-xl-3 theiaStickySidebar">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="doctor-widget">
+                            <div class="doc-info-left">
+                                <div class="doctor-img">
+                                    {% if doctor.profile.image %}
+                                    <img src="{{ doctor.profile.image.url }}" class="img-fluid" alt="Doctor Image">
+                                    {% else %}
+                                    <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" class="img-fluid" alt="Doctor Image">
+                                    {% endif %}
+                                </div>
+                                <div class="doc-info-cont">
+                                    <h4 class="doc-name">Dr. {{ doctor.get_full_name }}</h4>
+                                    <p class="doc-speciality">{{ doctor.profile.specialization|default:"Médico General" }}</p>
+                                    
+                                    {% if doctor.profile.rating %}
+                                    <div class="rating">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= doctor.profile.rating %}
+                                            <i class="fas fa-star filled"></i>
+                                            {% else %}
+                                            <i class="fas fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="d-inline-block average-rating">({{ doctor.profile.reviews_count }})</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="clinic-details">
+                                        {% if doctor.profile.address %}
+                                        <p class="doc-location"><i class="fas fa-map-marker-alt"></i> {{ doctor.profile.address }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-info-right">
+                                <div class="clini-infos">
+                                    <ul>
+                                        {% if doctor.profile.experience %}
+                                        <li><i class="far fa-clock"></i> Experiencia: {{ doctor.profile.experience }} años</li>
+                                        {% endif %}
+                                        <li><i class="fas fa-money-bill-alt"></i> Consulta: {{ doctor.profile.price_per_consultation|floatformat:2 }} €</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulario de Cita -->
+            <div class="col-md-8 col-lg-8 col-xl-9">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="booking-wizard">
+                            <!-- Progress Bar -->
+                            <div class="progress booking-progress mb-4">
+                                <div class="progress-bar" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            
+                            <!-- Form -->
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <!-- Step 1: Información básica -->
+                                <div class="booking-step" id="step-1">
+                                    <h5 class="mb-4">Paso 1: Información de la Cita</h5>
+                                    
+                                    <div class="form-group">
+                                        <label>{{ form.reason.label }}</label>
+                                        {{ form.reason }}
+                                        {% if form.reason.errors %}
+                                        <div class="text-danger">{{ form.reason.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>{{ form.consultation_type.label }}</label>
+                                        {{ form.consultation_type }}
+                                        {% if form.consultation_type.errors %}
+                                        <div class="text-danger">{{ form.consultation_type.errors }}</div>
+                                        {% endif %}
+                                        <div class="mt-2">
+                                            <div class="type-info" id="normal-info">
+                                                <span class="badge badge-info">Consulta Normal: 50.00 €</span>
+                                                <small class="form-text text-muted">Consulta médica general</small>
+                                            </div>
+                                            <div class="type-info" id="specialty-info" style="display:none;">
+                                                <span class="badge badge-primary">Consulta Especialidad: 100.00 €</span>
+                                                <small class="form-text text-muted">Consulta con especialista</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group mt-4">
+                                        <button type="button" class="btn btn-primary next-step" data-step="2">Continuar</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 2: Fecha y Hora -->
+                                <div class="booking-step" id="step-2" style="display:none;">
+                                    <h5 class="mb-4">Paso 2: Seleccione Fecha y Hora</h5>
+                                    
+                                    <div class="form-group">
+                                        <label>{{ form.date.label }}</label>
+                                        {{ form.date }}
+                                        {% if form.date.errors %}
+                                        <div class="text-danger">{{ form.date.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>{{ form.time.label }}</label>
+                                        {{ form.time }}
+                                        {% if form.time.errors %}
+                                        <div class="text-danger">{{ form.time.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-step="1">Anterior</button>
+                                        <button type="button" class="btn btn-primary next-step" data-step="3">Continuar</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 3: Horarios Disponibles -->
+                                <div class="booking-step" id="step-3" style="display:none;">
+                                    <h5 class="mb-4">Paso 3: Horarios Disponibles</h5>
+                                    
+                                    {% if available_slots %}
+                                    <div class="row">
+                                        {% for day, slots in available_slots.items %}
+                                        <div class="col-md-6 mb-3">
+                                            <h6>{{ day }}</h6>
+                                            {% for slot in slots %}
+                                            <span class="badge badge-pill badge-primary available-slot m-1" 
+                                                  data-date="{{ slot.date }}" 
+                                                  data-time="{{ slot.time }}">
+                                                {{ slot.time }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-warning">
+                                        <h6>No hay horarios disponibles para este doctor</h6>
+                                        <p>El doctor no tiene horarios de atención configurados.</p>
+                                        
+                                        {% if is_admin %}
+                                        <a href="{% url 'doctors:schedule-timings' %}?doctor={{ doctor.pk }}" class="btn btn-primary btn-sm mt-2">
+                                            <i class="fas fa-plus-circle"></i> Agregar Horario de Atención
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="form-group mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-step="2">Anterior</button>
+                                        <button type="button" class="btn btn-primary next-step" data-step="4" {% if not available_slots %}disabled{% endif %}>Continuar</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 4: Historial Médico -->
+                                <div class="booking-step" id="step-4" style="display:none;">
+                                    <h5 class="mb-4">Paso 4: Información Médica (opcional)</h5>
+                                    
+                                    <div class="form-group">
+                                        <label>{{ form.medical_conditions.label }}</label>
+                                        {{ form.medical_conditions }}
+                                        <small class="form-text text-muted">Indique si tiene alguna condición médica relevante para esta consulta.</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>{{ form.medical_history_file.label }}</label>
+                                        {{ form.medical_history_file }}
+                                        <small class="form-text text-muted">{{ form.medical_history_file.help_text }}</small>
+                                        {% if form.medical_history_file.errors %}
+                                        <div class="text-danger">{{ form.medical_history_file.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-step="3">Anterior</button>
+                                        <button type="button" class="btn btn-primary next-step" data-step="5">Revisar y Confirmar</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 5: Resumen y Confirmación -->
+                                <div class="booking-step" id="step-5" style="display:none;">
+                                    <h5 class="mb-4">Paso 5: Revisar y Confirmar</h5>
+                                    
+                                    <div class="card">
+                                        <div class="card-body booking-summary">
+                                            <h6>Resumen de la Cita</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="booking-info">
+                                                        <p><strong>Doctor:</strong> Dr. {{ doctor.get_full_name }}</p>
+                                                        <p><strong>Paciente:</strong> {{ patient.get_full_name }}</p>
+                                                        <p><strong>Motivo:</strong> <span id="summary-reason"></span></p>
+                                                        <p><strong>Tipo de Consulta:</strong> <span id="summary-type"></span></p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="booking-info">
+                                                        <p><strong>Fecha:</strong> <span id="summary-date"></span></p>
+                                                        <p><strong>Hora:</strong> <span id="summary-time"></span></p>
+                                                        <p><strong>Precio:</strong> <span id="summary-price"></span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-step="4">Anterior</button>
+                                        <button type="submit" class="btn btn-success">Confirmar y Agendar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Inicializar el formulario
+        updateProgress(1);
+        
+        // Cambiar entre pasos
+        $(".next-step").click(function() {
+            const currentStep = parseInt($(this).data("step") - 1);
+            const nextStep = parseInt($(this).data("step"));
+            
+            // Validar el paso actual antes de continuar
+            if (validateStep(currentStep)) {
+                // Ocultar paso actual y mostrar siguiente
+                $("#step-" + currentStep).hide();
+                $("#step-" + nextStep).show();
+                
+                // Actualizar la barra de progreso
+                updateProgress(nextStep);
+                
+                // Si estamos en el paso de resumen, actualizar la información
+                if (nextStep === 5) {
+                    updateSummary();
+                }
+            }
+        });
+        
+        $(".prev-step").click(function() {
+            const currentStep = parseInt($(this).data("step") + 1);
+            const prevStep = parseInt($(this).data("step"));
+            
+            // Ocultar paso actual y mostrar anterior
+            $("#step-" + currentStep).hide();
+            $("#step-" + prevStep).show();
+            
+            // Actualizar la barra de progreso
+            updateProgress(prevStep);
+        });
+        
+        // Cambiar información según tipo de consulta
+        $("#id_consultation_type").change(function() {
+            const type = $(this).val();
+            $(".type-info").hide();
+            
+            if (type === "normal") {
+                $("#normal-info").show();
+            } else if (type === "specialty") {
+                $("#specialty-info").show();
+            }
+        });
+        
+        // Selección de slots disponibles
+        $(".available-slot").click(function() {
+            $(".available-slot").removeClass("selected");
+            $(this).addClass("selected");
+            
+            // Actualizar campos de fecha y hora
+            $("#id_date").val($(this).data("date"));
+            $("#id_time").val($(this).data("time"));
+        });
+        
+        // Funciones auxiliares
+        function updateProgress(step) {
+            const progressPercentage = step * 20;
+            $(".booking-progress .progress-bar").css("width", progressPercentage + "%");
+            $(".booking-progress .progress-bar").attr("aria-valuenow", progressPercentage);
+        }
+        
+        function validateStep(step) {
+            if (step === 1) {
+                return $("#id_reason").val() && $("#id_consultation_type").val();
+            } else if (step === 2) {
+                return $("#id_date").val() && $("#id_time").val();
+            }
+            return true;
+        }
+        
+        function updateSummary() {
+            // Actualizar resumen de la cita
+            $("#summary-reason").text($("#id_reason").val());
+            
+            const consultationType = $("#id_consultation_type").val();
+            let typeText = "";
+            let price = "";
+            
+            if (consultationType === "normal") {
+                typeText = "Consulta Normal";
+                price = "50.00 €";
+            } else if (consultationType === "specialty") {
+                typeText = "Consulta Especialidad";
+                price = "100.00 €";
+            }
+            
+            $("#summary-type").text(typeText);
+            $("#summary-price").text(price);
+            $("#summary-date").text($("#id_date").val());
+            $("#summary-time").text($("#id_time").val());
+        }
+    });
+</script>
+{% endblock %}

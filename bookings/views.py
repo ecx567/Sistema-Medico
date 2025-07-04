@@ -1,15 +1,26 @@
+import os
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import View
-from django.http import HttpRequest, Http404
+from django.contrib.auth.decorators import login_required
+from django.views.generic import View,ListView, DetailView, UpdateView, TemplateView, CreateView
+from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
+from django.http import HttpResponseRedirect, HttpRequest, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q, Count
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages
+from django.conf import settings
 from django.views.generic.base import TemplateView
-
-from accounts.models import User
+from django import forms
+from accounts.models import User, Profile
+from core.models import Speciality, Review
+from bookings.models import Booking
+from doctors.models.general import TimeRange, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
 from doctors.models.general import TimeRange
 from mixins.custom_mixins import PatientRequiredMixin
 from .models import Booking
+from datetime import datetime, timedelta
 
 
 class BookingView(LoginRequiredMixin, View):
@@ -35,6 +46,7 @@ class BookingView(LoginRequiredMixin, View):
 
     def get_available_slots(self, doctor, date):
         """Get available time slots for a specific date"""
+        #available_slots = {}
         day_name = date.strftime("%A").lower()
         day_schedule = getattr(doctor, day_name, None)
 
@@ -156,6 +168,8 @@ class BookingCreateView(LoginRequiredMixin, View):
 
         return redirect("bookings:doctor-booking-view", username=username)
 
+    
+    
 
 class BookingSuccessView(LoginRequiredMixin, TemplateView):
     template_name = "bookings/booking-success.html"
@@ -221,3 +235,231 @@ class BookingListView(LoginRequiredMixin, View):
         }
         
         return render(request, self.template_name, context)
+
+
+####
+
+# Formulario para agendar citas
+class BookingForm(forms.Form):
+    reason = forms.CharField(
+        label="Motivo de la cita",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=True
+    )
+    consultation_type = forms.ChoiceField(
+        label="Tipo de consulta",
+        choices=[('normal', 'Consulta Normal'), ('specialty', 'Consulta Especialidad')],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    date = forms.DateField(
+        label="Fecha",
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=True
+    )
+    time = forms.TimeField(
+        label="Hora",
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        required=True
+    )
+    medical_conditions = forms.CharField(
+        label="Condiciones médicas",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False
+    )
+    medical_history_file = forms.FileField(
+        label="Subir historial clínico (PDF o imagen)",
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control'}),
+        help_text="Puede subir un archivo PDF o una imagen de su historial clínico"
+    )
+    def clean_medical_history_file(self):
+        file = self.cleaned_data.get('medical_history_file')
+        if file:
+            ext = file.name.split('.')[-1].lower()
+            allowed_extensions = ['pdf', 'jpg', 'jpeg', 'png']
+            if ext not in allowed_extensions:
+                raise forms.ValidationError(
+                    "Solo se permiten archivos PDF o imágenes (jpg, jpeg, png)"
+                )
+            if file.size > 5 * 1024 * 1024:  # 5MB
+                raise forms.ValidationError("El archivo no debe superar los 5MB")
+        return file
+
+@login_required
+def after_register_patient(request, pk):
+    """Vista que se muestra después de registrar un paciente"""
+    patient = get_object_or_404(User, pk=pk, role='patient')
+    
+    # Búsqueda de doctores
+    query = request.GET.get('q', '')
+    specialization = request.GET.get('specialization', '')
+    
+    doctors = User.objects.filter(role='doctor').select_related('profile')
+    
+    if query:
+        doctors = doctors.filter(
+            Q(first_name__icontains=query) | 
+            Q(last_name__icontains=query) | 
+            Q(profile__specialization__icontains=query)
+        )
+
+    if specialization:
+        doctors = doctors.filter(profile__specialization__icontains=specialization)
+    
+    # Obtener especialidades para el filtro
+    specialities = Speciality.objects.all()
+    
+    return render(request, 'patients/after_register.html', {
+        'patient': patient,
+        'doctors': doctors,
+        'query': query,
+        'specialization': specialization,
+        'specialities': specialities,
+    })
+
+@login_required
+def doctor_booking(request, doctor_pk, patient_pk):
+    """Vista para agendar cita con un doctor"""
+    doctor = get_object_or_404(User, pk=doctor_pk, role='doctor')
+    patient = get_object_or_404(User, pk=patient_pk, role='patient')
+    
+    # Verificar si el doctor tiene horarios configurados
+    horarios = TimeRange.objects.filter(doctor=doctor)
+    
+    if not horarios.exists():
+        return render(request, 'patients/doctor_no_schedule.html', {
+            'doctor': doctor,
+            'patient': patient,
+            'is_admin': request.user.is_staff
+        })
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Determinar el costo según el tipo de consulta
+            consultation_type = form.cleaned_data['consultation_type']
+            cost = 50 if consultation_type == 'normal' else 100  # Valores estándar
+            
+            # Crear la cita
+            booking = Booking.objects.create(
+                doctor=doctor,
+                patient=patient,
+                appointment_date=form.cleaned_data['date'],
+                appointment_time=form.cleaned_data['time'],
+                status='pending',
+                notes=form.cleaned_data['reason'],
+                consultation_type=consultation_type,
+            )
+
+            # Manejar archivo de historial médico si fue cargado
+            if form.cleaned_data['medical_history_file']:
+                file = form.cleaned_data['medical_history_file']
+                file_ext = os.path.splitext(file.name)[1]
+                new_filename = f"medical_history_{patient.id}_{booking.id}{file_ext}"
+                
+                # Guardar en el directorio media
+                file_path = f"medical_histories/{new_filename}"
+                os.makedirs(os.path.join(settings.MEDIA_ROOT, 'medical_histories'), exist_ok=True)
+                
+                with open(os.path.join(settings.MEDIA_ROOT, file_path), 'wb+') as destination:
+                    for chunk in file.chunks():
+                        destination.write(chunk)
+                
+                booking.medical_history_file = file_path
+                booking.save()
+
+            # Guardar información de historial clínico
+            if form.cleaned_data['medical_conditions']:
+                if not patient.profile.medical_conditions:
+                    patient.profile.medical_conditions = form.cleaned_data['medical_conditions']
+                    patient.profile.save()
+            
+            messages.success(request, "Cita agendada correctamente.")
+            return render(request, 'patients/booking_success.html', {
+                'doctor': doctor,
+                'patient': patient,
+                'booking': booking,
+                'cost': cost,
+            })
+    else:
+        form = BookingForm()
+
+    # Obtener horarios disponibles
+    available_slots = get_available_slots(doctor)
+    
+    return render(request, 'patients/doctor_booking.html', {
+        'doctor': doctor,
+        'patient': patient,
+        'form': form,
+        'available_slots': available_slots,
+        'is_admin': request.user.is_staff
+    })
+
+def get_available_slots(doctor):
+    """Obtiene los slots disponibles para un doctor"""
+    # Obtener todos los horarios del doctor
+    time_ranges = TimeRange.objects.filter(doctor=doctor)
+    
+    if not time_ranges.exists():
+        return {}
+    
+    # Obtener citas existentes para este doctor
+    today = datetime.now().date()
+    end_date = today + timedelta(days=30)  # Mostrar disponibilidad para los próximos 30 días
+    
+    existing_bookings = Booking.objects.filter(
+        doctor=doctor,
+        appointment_date__gte=today,
+        appointment_date__lte=end_date,
+        status__in=['pending', 'confirmed']
+    ).values_list('appointment_date', 'appointment_time')
+    
+    # Crear un diccionario para almacenar los slots por día
+    available_slots = {}
+    
+    # Para cada día en el rango de 30 días
+    current_date = today
+    while current_date <= end_date:
+        day_name = current_date.strftime('%A').lower()  # Nombre del día en inglés
+
+        # Buscar rangos de tiempo para este día
+        day_ranges = time_ranges.filter(day=day_name)
+        
+        if day_ranges.exists():
+            # Si hay horarios para este día, generar slots
+            slots = []
+            
+            for time_range in day_ranges:
+                start_time = time_range.start_time
+                end_time = time_range.end_time
+                
+                # Generar slots de 30 minutos
+                current_time = start_time
+                while current_time < end_time:
+                    # Verificar si este slot ya está reservado
+                    is_booked = (current_date, current_time) in existing_bookings
+                    
+                    if not is_booked:
+                        slots.append({
+                            'date': current_date.strftime('%Y-%m-%d'),
+                            'time': current_time.strftime('%H:%M')
+                        })
+                    
+                    # Avanzar 30 minutos
+                    current_time_dt = datetime.combine(today, current_time)
+                    current_time_dt += timedelta(minutes=30)
+                    current_time = current_time_dt.time()
+            
+            # Si hay slots disponibles para este día, agregarlos al diccionario
+            if slots:
+                day_display = current_date.strftime('%d/%m/%Y')
+                available_slots[day_display] = slots
+        
+        # Avanzar al siguiente día
+        current_date += timedelta(days=1)
+    
+    return available_slots
+
+
+    

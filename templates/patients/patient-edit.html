@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Paciente - {{ object.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Editar Información del Paciente</h4>
+                            <a href="{% url 'patients:patient-detail' object.id %}" class="btn btn-secondary">
+                                <i class="fa fa-arrow-left"></i> Volver a Detalles
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <!-- Foto de perfil -->
+                                <div class="col-md-4 mb-4 text-center">
+                                    <h5 class="mb-3">Foto de Perfil</h5>
+                                    <div class="profile-pic-wrapper mb-3">
+                                        <div class="profile-pic-holder">
+                                            {% if object.profile.image %}
+                                            <img id="profilePic" class="profile-pic rounded-circle" src="{{ object.profile.image.url }}" style="width: 200px; height: 200px; object-fit: cover;">
+                                            {% else %}
+                                            <img id="profilePic" class="profile-pic rounded-circle" src="{% static 'assets/img/patients/patient-default.jpg' %}" style="width: 200px; height: 200px; object-fit: cover;">
+                                            {% endif %}
+                                        </div>
+                                        <label for="newProfilePhoto" class="btn btn-primary mt-3">
+                                            <i class="fa fa-camera"></i> Cambiar Foto
+                                        </label>
+                                        <input id="newProfilePhoto" type="file" name="avatar" accept="image/*" style="display: none;">
+                                    </div>
+                                </div>
+                                
+                                <!-- Información personal -->
+                                <div class="col-md-8">
+                                    <h5>Información Personal</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label>Nombre</label>
+                                            <input type="text" name="first_name" class="form-control" value="{{ object.first_name }}" required>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Apellidos</label>
+                                            <input type="text" name="last_name" class="form-control" value="{{ object.last_name }}" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label>Email</label>
+                                            <input type="email" name="email" class="form-control" value="{{ object.email }}" required>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Teléfono</label>
+                                            <input type="text" name="phone" class="form-control" value="{{ object.profile.phone|default:'' }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label>Fecha de Nacimiento</label>
+                                            <input type="date" name="dob" class="form-control" value="{{ object.profile.dob|date:'Y-m-d'|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label>Género</label>
+                                            <select name="gender" class="form-control">
+                                                <option value="">Seleccionar</option>
+                                                <option value="male" {% if object.profile.gender == 'male' %}selected{% endif %}>Masculino</option>
+                                                <option value="female" {% if object.profile.gender == 'female' %}selected{% endif %}>Femenino</option>
+                                                <option value="other" {% if object.profile.gender == 'other' %}selected{% endif %}>Otro</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label>Grupo Sanguíneo</label>
+                                            <select name="blood_group" class="form-control">
+                                                <option value="">Seleccionar</option>
+                                                {% for bg_value, bg_name in blood_group_choices %}
+                                                <option value="{{ bg_value }}" {% if object.profile.blood_group == bg_value %}selected{% endif %}>{{ bg_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="mt-4 mb-4">
+                            
+                            <div class="row">
+                                <!-- Información médica -->
+                                <div class="col-md-6">
+                                    <h5>Información Médica</h5>
+                                    
+                                    <div class="form-group">
+                                        <label>Condiciones Médicas</label>
+                                        <textarea name="medical_conditions" class="form-control" rows="4">{{ object.profile.medical_conditions|default:'' }}</textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Alergias</label>
+                                        <textarea name="allergies" class="form-control" rows="4">{{ object.profile.allergies|default:'' }}</textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dirección -->
+                                <div class="col-md-6">
+                                    <h5>Dirección</h5>
+                                    
+                                    <div class="form-group">
+                                        <label>Dirección</label>
+                                        <input type="text" name="address" class="form-control" value="{{ object.profile.address|default:'' }}">
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label>Ciudad</label>
+                                            <input type="text" name="city" class="form-control" value="{{ object.profile.city|default:'' }}">
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Estado/Provincia</label>
+                                            <input type="text" name="state" class="form-control" value="{{ object.profile.state|default:'' }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label>Código Postal</label>
+                                            <input type="text" name="postal_code" class="form-control" value="{{ object.profile.postal_code|default:'' }}">
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>País</label>
+                                            <input type="text" name="country" class="form-control" value="{{ object.profile.country|default:'' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa fa-save"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Vista previa de la imagen de perfil
+        $("#newProfilePhoto").change(function() {
+            const file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(event) {
+                    $("#profilePic").attr("src", event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+{% endblock %}

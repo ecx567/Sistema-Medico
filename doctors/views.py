@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
 
+
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -43,11 +45,11 @@ from mixins.custom_mixins import DoctorRequiredMixin
 from patients.forms import ChangePasswordForm
 from utils.htmx import render_toast_message_for_api
 from accounts.models import User
-
+from bookings.models import Booking
 
 # Importar el modelo de Feedback
 from feedback.models import Feedback
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 
 days = {
     0: Sunday,
@@ -704,3 +706,84 @@ class PrescriptionDetailView(DoctorRequiredMixin, DetailView):
             "patient__profile",
             "booking",
         )
+
+
+#####
+
+@login_required
+def after_register_doctor(request, pk):
+    """Vista que se muestra después de registrar un doctor"""
+    doctor = get_object_or_404(User, pk=pk, role='doctor')
+    
+    # Obtener todos los doctores con estadísticas
+    doctors = User.objects.filter(role='doctor').select_related('profile')
+    
+    for doc in doctors:
+        # Contar pacientes únicos
+        doc.patients_count = Booking.objects.filter(doctor=doc).values('patient').distinct().count()
+        
+        # Contar citas totales
+        doc.appointments_count = Booking.objects.filter(doctor=doc).count()
+        # Contar citas pendientes
+        doc.pending_appointments = Booking.objects.filter(doctor=doc, status='pending').count()
+        # Contar citas completadas
+        doc.completed_appointments = Booking.objects.filter(doctor=doc, status='completed').count()
+
+        #  # Contar citas por estado
+        # doc.citas_pendientes = Booking.objects.filter(doctor=doc, status='pending').count()
+        # doc.citas_completadas = Booking.objects.filter(doctor=doc, status='completed').count()
+        # doc.citas_count = Booking.objects.filter(doctor=doc).count()
+
+    # Filtrar citas pendientes para el doctor recién registrado
+    pending_appointments = Booking.objects.filter(doctor=doctor,status='pending').select_related('patient', 'patient__profile')
+    
+    return render(request, 'doctors/after_register.html', {
+        'doctor': doctor,
+        'doctors': doctors,
+        'pending_appointments': pending_appointments,
+        'is_admin': request.user.is_staff,
+    })
+
+@login_required
+def doctor_appointment_action(request, appointment_id, action):
+    """Acción sobre una cita (aceptar/rechazar/completar)"""
+    if request.method != 'POST':
+        return redirect('doctors:dashboard')
+    
+    appointment = get_object_or_404(
+        Booking,
+        id=appointment_id,
+        doctor=request.user
+    )
+    
+    if action == 'accept':
+        appointment.status = 'confirmed'
+        messages.success(request, 'Cita confirmada correctamente')
+    elif action == 'reject':
+        appointment.status = 'cancelled'
+        messages.success(request, 'Cita rechazada correctamente')
+    elif action == 'complete':
+        appointment.status = 'completed'
+        messages.success(request, 'Cita marcada como completada correctamente')
+    
+    appointment.save()
+
+    # Redireccionar a la página actual (after-register o dashboard)
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+    
+    return redirect('doctors:dashboard')
+
+
+# Agregar esta vista para la página de éxito de cita
+class AppointmentSuccessView(LoginRequiredMixin, DetailView):
+    model = Booking
+    template_name = "patients/appointment-success.html"
+    context_object_name = "appointment"
+    pk_url_kwarg = 'booking_id'
+
+    def get_queryset(self):
+        return Booking.objects.select_related(
+            "doctor", "doctor__profile", "patient", "patient__profile"
+        ).filter(patient=self.request.user)

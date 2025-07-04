@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agendar Cita con Dr. {{ doctor.get_full_name }}{% endblock %}
+
+{% block styles %}
+<!-- FullCalendar CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+<link rel="stylesheet" href="{% static 'assets/css/fullcalendar-booking.css' %}">
+<style>
+    /* Estilos adicionales para garantizar visualización horizontal */
+    .fc .fc-timegrid-axis-frame, .fc .fc-timegrid-slot-label-frame {
+        justify-content: center;
+    }
+    .fc .fc-col-header-cell {
+        background-color: #f8f9fa;
+    }
+    .fc .fc-timegrid-slot-minor {
+        border-top-style: none !important;
+    }
+    .time-slots-table tr {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-start;
+    }
+    .time-slots-table td {
+        min-width: 100px;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'patients:after-register' patient.pk %}">Doctores</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Agendar Cita</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Agendar Cita</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Doctor Info -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="doctor-widget">
+                            <div class="doc-info-left">
+                                <div class="doctor-img">
+                                    {% if doctor.profile.image %}
+                                    <img src="{{ doctor.profile.image.url }}" class="img-fluid" alt="{{ doctor.get_full_name }}">
+                                    {% else %}
+                                    <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" class="img-fluid" alt="{{ doctor.get_full_name }}">
+                                    {% endif %}
+                                </div>
+                                <div class="doc-info-cont">
+                                    <h4 class="doc-name">Dr. {{ doctor.get_full_name }}</h4>
+                                    <p class="doc-speciality">{{ doctor.profile.specialization }}</p>
+                                    <div class="rating">
+                                        <i class="fas fa-star {% if doctor.rating >= 1 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if doctor.rating >= 2 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if doctor.rating >= 3 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if doctor.rating >= 4 %}filled{% endif %}"></i>
+                                        <i class="fas fa-star {% if doctor.rating >= 5 %}filled{% endif %}"></i>
+                                    </div>
+                                    <div class="clinic-details">
+                                        <p class="doc-location"><i class="fas fa-map-marker-alt"></i> {{ doctor.profile.city }}, {{ doctor.profile.country }}</p>
+                                        <p><i class="far fa-money-bill-alt"></i> Consulta General: $50 | Especialidad: $100</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h4 class="card-title mb-0">Agendar Cita</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" id="booking-form">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>{{ form.reason.label }}</label>
+                                        {{ form.reason }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>{{ form.consultation_type.label }}</label>
+                                        <div class="d-flex flex-wrap">
+                                            <div class="form-check mr-4 mb-3">
+                                                <input class="form-check-input" type="radio" name="consultation_type" id="consultation_normal" value="normal" checked>
+                                                <label class="form-check-label" for="consultation_normal">
+                                                    <i class="fas fa-stethoscope text-primary"></i> Consulta General ($50)
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="radio" name="consultation_type" id="consultation_specialty" value="specialty">
+                                                <label class="form-check-label" for="consultation_specialty">
+                                                    <i class="fas fa-user-md text-info"></i> Consulta por Especialidad ($100)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>{{ form.medical_conditions.label }}</label>
+                                        {{ form.medical_conditions }}
+                                        <small class="form-text text-muted">Describa cualquier condición médica, alergias, o información relevante para la consulta.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>{{ form.medical_history_file.label }}</label>
+                                        {{ form.medical_history_file }}
+                                        <small class="form-text text-muted">{{ form.medical_history_file.help_text }}</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h4 class="mb-4">
+                                        <i class="fas fa-calendar-alt text-primary mr-2"></i>
+                                        Seleccione fecha y hora
+                                    </h4>
+                                </div>
+                            </div>
+                            
+                            <!-- Contenedor del Calendario con FullCalendar -->
+                            <div class="appointment-scheduling">
+                                <!-- Barra de herramientas del calendario -->
+                                <div class="calendar-toolbar mb-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-7 mb-3 mb-md-0">
+                                            <div class="calendar-navigation">
+                                                <button type="button" id="prev-btn" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </button>
+                                                <button type="button" id="today-btn" class="btn btn-sm btn-outline-primary mx-2">
+                                                    Hoy
+                                                </button>
+                                                <button type="button" id="next-btn" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </button>
+                                                <h3 id="calendar-title" class="calendar-title ml-3 mb-0"></h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="calendar-views text-md-right">
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" id="month-view" class="btn btn-sm btn-primary">Mes</button>
+                                                    <button type="button" id="week-view" class="btn btn-sm btn-outline-primary">Semana</button>
+                                                    <button type="button" id="day-view" class="btn btn-sm btn-outline-primary">Día</button>
+                                                    <button type="button" id="list-view" class="btn btn-sm btn-outline-primary">Lista</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Filtros y leyenda -->
+                                <div class="scheduling-header mb-3">
+                                    <div class="filter-options">
+                                        <button type="button" id="show-all-slots" class="btn btn-sm btn-outline-secondary active">
+                                            <i class="fas fa-calendar-alt"></i> Todos los horarios
+                                        </button>
+                                        <button type="button" id="show-available-slots" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-check-circle"></i> Solo disponibles
+                                        </button>
+                                    </div>
+                                    <div class="legend">
+                                        <div class="legend-item">
+                                            <span class="legend-color available"></span>
+                                            <span>Disponible</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-color unavailable"></span>
+                                            <span>No disponible</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-color selected"></span>
+                                            <span>Seleccionado</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Calendario FullCalendar -->
+                                <div id="appointment-calendar" class="appointment-calendar"></div>
+                                
+                                <!-- Selección de horario -->
+                                <div class="time-slot-selection mt-4">
+                                    <h5>Horarios disponibles para <span id="selected-date">ninguna fecha seleccionada</span></h5>
+                                    <div id="time-slots-container" class="time-slots-container">
+                                        <div class="no-slots-message">Seleccione una fecha en el calendario para ver los horarios disponibles</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Resumen de la cita -->
+                                <div class="appointment-summary mt-4" id="appointment-summary" style="display: none;">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-calendar-check text-success"></i> Resumen de su cita</h5>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>Fecha:</strong> <span id="summary-date"></span></p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>Hora:</strong> <span id="summary-time"></span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Campos ocultos para el formulario -->
+                            {{ form.date }}
+                            {{ form.time }}
+
+                            <div class="submit-section text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg booking-btn" disabled id="submit-booking">
+                                    <i class="fas fa-calendar-check"></i> Confirmar Cita
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
+<script src="{% static 'assets/js/fullcalendar-booking.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos de disponibilidad desde el backend
+        const availableSlots = {{ available_slots|safe }};
+        
+        // Inicializar FullCalendar con los datos de disponibilidad
+        initAppointmentCalendar(availableSlots);
+    });
+</script>
+{% endblock %}

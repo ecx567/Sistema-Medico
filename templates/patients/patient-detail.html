@@ -1,0 +1,253 @@
+REA-ERICK\Documents\Medical-System\doccure-master\templates\patients\patient-detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalles del Paciente - {{ patient.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Información del Paciente</h4>
+                            <div class="btn-group">
+                                <a href="{% url 'patients:patient-edit' patient.id %}" class="btn btn-primary">
+                                    <i class="fa fa-edit"></i> Editar Información
+                                </a>
+                                <a href="{% url 'patients:patients-list' %}" class="btn btn-secondary">
+                                    <i class="fa fa-arrow-left"></i> Volver a la Lista
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Información básica y foto -->
+                            <div class="col-md-4 text-center mb-4">
+                                <div class="mb-4">
+                                    {% if patient.profile.image %}
+                                    <img src="{{ patient.profile.image.url }}" alt="{{ patient.get_full_name }}" class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
+                                    {% else %}
+                                    <img src="{% static 'assets/img/patients/patient-default.jpg' %}" alt="{{ patient.get_full_name }}" class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                <h3>{{ patient.get_full_name }}</h3>
+                                <p class="text-muted">ID: #{{ patient.id }}</p>
+
+                                {% if patient.profile.gender %}
+                                <span class="badge badge-pill bg-info-light mb-2">{{ patient.profile.gender|title }}</span>
+                                {% endif %}
+                                
+                                {% if patient.profile.blood_group %}
+                                <span class="badge badge-pill bg-danger-light mb-2">Grupo {{ patient.profile.blood_group }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Datos personales -->
+                            <div class="col-md-4">
+                                <h5><i class="fa fa-user text-primary"></i> Datos Personales</h5>
+                                <div class="info-list">
+                                    <div class="info-item">
+                                        <span class="info-label">Nombre completo:</span>
+                                        <span class="info-value">{{ patient.get_full_name }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value">{{ patient.email }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Teléfono:</span>
+                                        <span class="info-value">{{ patient.profile.phone|default:"No especificado" }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Edad:</span>
+                                        <span class="info-value">{{ patient.profile.age|default:"No especificada" }} años</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Fecha de nacimiento:</span>
+                                        <span class="info-value">{{ patient.profile.dob|date:"d/m/Y"|default:"No especificada" }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Dirección:</span>
+                                        <span class="info-value">
+                                            {{ patient.profile.address|default:"" }}
+                                            {% if patient.profile.city or patient.profile.state %}
+                                                {{ patient.profile.city }}{% if patient.profile.city and patient.profile.state %}, {% endif %}{{ patient.profile.state }}
+                                            {% endif %}
+                                            {% if patient.profile.postal_code %}
+                                                ({{ patient.profile.postal_code }})
+                                            {% endif %}
+                                            {{ patient.profile.country|default:"" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Información médica -->
+                            <div class="col-md-4">
+                                <h5><i class="fa fa-heartbeat text-danger"></i> Información Médica</h5>
+                                <div class="info-list">
+                                    {% if patient.profile.medical_conditions %}
+                                    <div class="info-item">
+                                        <span class="info-label">Condiciones médicas:</span>
+                                        <span class="info-value">{{ patient.profile.medical_conditions }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if patient.profile.allergies %}
+                                    <div class="info-item">
+                                        <span class="info-label">Alergias:</span>
+                                        <span class="info-value">{{ patient.profile.allergies }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <h5 class="mt-4"><i class="fa fa-calendar-check text-success"></i> Estadísticas</h5>
+                                <div class="info-list">
+                                    <div class="info-item">
+                                        <span class="info-label">Total citas:</span>
+                                        <span class="info-value">{{ total_appointments }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Citas completadas:</span>
+                                        <span class="info-value text-success">{{ completed_appointments }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Citas canceladas:</span>
+                                        <span class="info-value text-danger">{{ cancelled_appointments }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Total pagado:</span>
+                                        <span class="info-value text-primary">{{ total_paid|floatformat:2 }} €</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-label">Última visita:</span>
+                                        <span class="info-value">{{ last_visit|date:"d/m/Y"|default:"Nunca" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historial de citas -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Historial de Citas</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Doctor</th>
+                                        <th>Especialidad</th>
+                                        <th>Estado</th>
+                                        <th>Importe</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    <tr>
+                                        <td>
+                                            {{ appointment.appointment_date|date:"d/m/Y" }}
+                                            <span class="d-block text-info">{{ appointment.appointment_time|time:"H:i" }}</span>
+                                        </td>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="#" class="avatar avatar-sm mr-2">
+                                                    {% if appointment.doctor.profile.image %}
+                                                    <img class="avatar-img rounded-circle" src="{{ appointment.doctor.profile.image.url }}" alt="Doctor Image">
+                                                    {% else %}
+                                                    <img class="avatar-img rounded-circle" src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="Doctor Image">
+                                                    {% endif %}
+                                                </a>
+                                                <a href="#">Dr. {{ appointment.doctor.get_full_name }}</a>
+                                            </h2>
+                                        </td>
+                                        <td>{{ appointment.doctor.profile.specialization }}</td>
+                                        <td>
+                                            <span class="badge badge-pill 
+                                                {% if appointment.status == 'confirmed' %}bg-success-light{% endif %}
+                                                {% if appointment.status == 'pending' %}bg-warning-light{% endif %}
+                                                {% if appointment.status == 'cancelled' %}bg-danger-light{% endif %}
+                                                {% if appointment.status == 'completed' %}bg-info-light{% endif %}">
+                                                {{ appointment.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ appointment.doctor.profile.price_per_consultation|floatformat:2 }} €</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{% url 'patients:appointment-detail' appointment.pk %}" class="btn btn-sm bg-info-light">
+                                                    <i class="fe fe-eye"></i> Ver
+                                                </a>
+                                                {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+                                                <form method="post" action="{% url 'patients:appointment-cancel' appointment.pk %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('¿Estás seguro de cancelar esta cita?')">
+                                                        <i class="fe fe-x"></i> Cancelar
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fa fa-calendar-alt fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay citas registradas para este paciente</h5>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .info-list {
+        margin-bottom: 20px;
+    }
+    .info-item {
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed #e0e0e0;
+    }
+    .info-label {
+        display: block;
+        color: #757575;
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+    }
+    .info-value {
+        color: #272b41;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

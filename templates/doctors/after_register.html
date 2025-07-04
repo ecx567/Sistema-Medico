@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Doctor Registrado - {{ doctor.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Bienvenida</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Doctor Registrado Exitosamente</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-success">
+                                    <h4><i class="fas fa-check-circle"></i> ¡Felicidades Dr. {{ doctor.get_full_name }}!</h4>
+                                    <p>Tu cuenta de doctor ha sido creada exitosamente. Ahora puedes configurar tu horario, atender pacientes y gestionar tus citas médicas.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        {% if doctor.profile.image %}
+                                        <img src="{{ doctor.profile.image.url }}" alt="{{ doctor.get_full_name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% else %}
+                                        <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="{{ doctor.get_full_name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <h4 class="mt-3">Dr. {{ doctor.get_full_name }}</h4>
+                                        <p class="text-muted">{{ doctor.profile.specialization|default:"Sin especialidad" }}</p>
+                                        <div class="mt-3">
+                                            <a href="{% url 'doctors:profile-settings' %}" class="btn btn-primary btn-sm">Completar Perfil</a>
+                                            <a href="{% url 'doctors:schedule-timings' %}" class="btn btn-info btn-sm">Configurar Horarios</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Próximos Pasos</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="feature-box">
+                                                    <div class="feature-header">
+                                                        <i class="fas fa-user-md fa-2x text-primary"></i>
+                                                        <h5>1. Completa tu Perfil</h5>
+                                                    </div>
+                                                    <p>Añade tu experiencia, educación y especialidades para que los pacientes te conozcan mejor.</p>
+                                                    <a href="{% url 'doctors:profile-settings' %}" class="text-primary">Ir a mi perfil <i class="fas fa-arrow-right"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="feature-box">
+                                                    <div class="feature-header">
+                                                        <i class="fas fa-clock fa-2x text-warning"></i>
+                                                        <h5>2. Configura tus Horarios</h5>
+                                                    </div>
+                                                    <p>Establece tus horarios de atención para que los pacientes puedan agendar citas contigo.</p>
+                                                    <a href="{% url 'doctors:schedule-timings' %}" class="text-primary">Configurar horarios <i class="fas fa-arrow-right"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Citas Pendientes -->
+                {% if pending_appointments %}
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Citas Pendientes de Confirmación</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Paciente</th>
+                                        <th>Fecha y Hora</th>
+                                        <th>Motivo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in pending_appointments %}
+                                    <tr>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="#" class="avatar avatar-sm mr-2">
+                                                    {% if appointment.patient.profile.image %}
+                                                    <img class="avatar-img rounded-circle" src="{{ appointment.patient.profile.image.url }}" alt="Foto de Paciente">
+                                                    {% else %}
+                                                    <img class="avatar-img rounded-circle" src="{% static 'assets/img/patients/patient-default.jpg' %}" alt="Foto de Paciente">
+                                                    {% endif %}
+                                                </a>
+                                                <a href="#">{{ appointment.patient.get_full_name }}</a>
+                                            </h2>
+                                        </td>
+                                        <td>
+                                            {{ appointment.appointment_date|date:"d M Y" }} <span class="text-primary d-block">{{ appointment.appointment_time|time:"H:i" }}</span>
+                                        </td>
+                                        <td>{{ appointment.notes|truncatechars:30 }}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <form method="post" action="{% url 'doctors:appointment-action' appointment.id 'accept' %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm bg-success-light mr-2">
+                                                        <i class="fas fa-check"></i> Aceptar
+                                                    </button>
+                                                </form>
+                                                <form method="post" action="{% url 'doctors:appointment-action' appointment.id 'reject' %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm bg-danger-light">
+                                                        <i class="fas fa-times"></i> Rechazar
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Lista de Doctores -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Otros Doctores en el Sistema</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Doctor</th>
+                                        <th>Especialidad</th>
+                                        <th>Pacientes</th>
+                                        <th>Citas</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doc in doctors %}
+                                    {% if doc.id != doctor.id %}
+                                    <tr>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="#" class="avatar avatar-sm me-2">
+                                                    {% if doc.profile.image %}
+                                                    <img class="avatar-img rounded-circle" src="{{ doc.profile.image.url }}" alt="Doctor Image">
+                                                    {% else %}
+                                                    <img class="avatar-img rounded-circle" src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="Doctor Image">
+                                                    {% endif %}
+                                                </a>
+                                                <a href="#">Dr. {{ doc.get_full_name }}</a>
+                                            </h2>
+                                        </td>
+                                        <td>{{ doc.profile.specialization|default:"No especificada" }}</td>
+                                        <td>{{ doc.patients_count }}</td>
+                                        <td>
+                                            <span class="badge badge-pill bg-success-light">{{ doc.pending_appointments }} pendientes</span>
+                                            <span class="badge badge-pill bg-info-light">{{ doc.completed_appointments }} completadas</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm bg-info-light">
+                                                    <i class="far fa-eye"></i> Ver
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay otros doctores registrados en el sistema.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

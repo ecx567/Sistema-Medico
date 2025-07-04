@@ -1,0 +1,366 @@
+/**
+ * Estilos personalizados para FullCalendar en el Sistema de Citas Médicas
+ */
+
+/* Variables de colores */
+:root {
+    --primary-color: #20c0f3;
+    --primary-light: #e3f2fd;
+    --primary-dark: #0daee3;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --danger-light: #ffebee;
+    --warning-color: #ffc107;
+    --text-dark: #272b41;
+    --border-color: #dee2e6;
+    --bg-light: #f8f9fa;
+}
+
+/* Contenedor principal */
+.appointment-scheduling {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+/* Barra de herramientas del calendario */
+.calendar-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.calendar-navigation {
+    display: flex;
+    align-items: center;
+}
+
+.calendar-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0 10px;
+    display: inline-block;
+}
+
+/* Encabezado con filtros y leyenda */
+.scheduling-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Opciones de filtro */
+.filter-options {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-options .btn {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 20px;
+}
+
+.filter-options .btn.active {
+    font-weight: 600;
+}
+
+.filter-options .btn-outline-primary.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.filter-options .btn-outline-secondary.active {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+/* Leyenda del calendario */
+.legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-dark);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.legend-color.available {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-color);
+}
+
+.legend-color.unavailable {
+    background-color: var(--danger-light);
+    border: 1px solid var(--danger-color);
+}
+
+.legend-color.selected {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-dark);
+}
+
+/* Calendario FullCalendar */
+.appointment-calendar {
+    height: 600px;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 5px;
+    margin-bottom: 20px;
+}
+
+/* Configuración para visualización horizontal */
+.fc .fc-timegrid-slots table {
+    width: 100% !important;
+}
+
+.fc .fc-timegrid-slot {
+    height: 3em !important;
+}
+
+.fc .fc-timegrid-col.fc-day-today {
+    background-color: var(--primary-light) !important;
+}
+
+.fc .fc-timegrid-col {
+    min-width: 100px !important;
+}
+
+/* Estilos para mejorar la cuadrícula */
+.fc .fc-scrollgrid {
+    border: 1px solid var(--border-color) !important;
+}
+
+.fc .fc-scrollgrid-section > * {
+    border-width: 1px !important;
+    border-color: var(--border-color) !important;
+}
+
+.fc .fc-daygrid-day {
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Encabezados de días y meses */
+.fc .fc-col-header-cell {
+    background-color: var(--bg-light);
+    font-weight: 600;
+}
+
+.fc .fc-col-header-cell-cushion {
+    font-weight: 600;
+    color: var(--text-dark);
+    padding: 10px;
+    text-decoration: none !important;
+}
+
+.fc .fc-daygrid-day-number {
+    font-weight: 500;
+    padding: 8px;
+    text-decoration: none !important;
+}
+
+/* Día actual */
+.fc .fc-day-today {
+    background-color: var(--primary-light) !important;
+}
+
+/* Estilos para los eventos del calendario */
+.fc .fc-event {
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.fc .event-available {
+    background-color: var(--primary-light) !important;
+    border: 1px solid var(--primary-color) !important;
+    color: var(--primary-dark) !important;
+    cursor: pointer;
+}
+
+.fc .event-unavailable {
+    background-color: var(--danger-light) !important;
+    border: 1px solid var(--danger-color) !important;
+    color: var(--danger-color) !important;
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.fc .event-selected {
+    background-color: var(--primary-color) !important;
+    border: 1px solid var(--primary-dark) !important;
+    color: white !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Selección de horarios */
+.time-slot-selection {
+    margin-top: 25px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.time-slot-selection h5 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+}
+
+.time-slots-container {
+    min-height: 80px;
+    overflow-x: auto;
+}
+
+/* Tabla de horarios horizontales */
+.time-slots-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 8px 0;
+    margin-bottom: 15px;
+}
+
+.time-slots-table th {
+    padding: 10px;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    font-weight: 600;
+    text-align: center;
+}
+
+.time-slots-table td {
+    padding: 5px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.time-slot-btn {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-color);
+    color: var(--text-dark);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 14px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.time-slot-btn:hover {
+    background-color: #d0ebf6;
+    transform: translateY(-2px);
+}
+
+.time-slot-btn.selected {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.no-slots-message {
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Resumen de cita */
+.appointment-summary {
+    margin-top: 25px;
+}
+
+.appointment-summary .card {
+    border-radius: 10px;
+    border-color: #e0f3ff;
+}
+
+.appointment-summary .card-title {
+    color: var(--primary-dark);
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.appointment-summary .card-body {
+    padding: 20px;
+}
+
+.appointment-summary strong {
+    color: var(--text-dark);
+}
+
+/* Botón de confirmación */
+.booking-btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(32, 192, 243, 0.2);
+    transition: all 0.3s;
+}
+
+.booking-btn:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(32, 192, 243, 0.3);
+}
+
+.booking-btn:disabled {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .scheduling-header, .calendar-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filter-options, .calendar-views, .calendar-navigation {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .filter-options .btn {
+        flex: 1;
+    }
+    
+    .legend {
+        justify-content: center;
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .appointment-calendar {
+        height: 500px;
+    }
+}

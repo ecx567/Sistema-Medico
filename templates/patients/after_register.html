@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Paciente Registrado - {{ patient.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Bienvenida</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Paciente Registrado Exitosamente</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-success">
+                                    <h4><i class="fas fa-check-circle"></i> ¡Bienvenido/a {{ patient.get_full_name }}!</h4>
+                                    <p>Tu cuenta ha sido creada exitosamente. Ahora puedes buscar doctores y agendar citas médicas.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        {% if patient.profile.image %}
+                                        <img src="{{ patient.profile.image.url }}" alt="{{ patient.get_full_name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% else %}
+                                        <img src="{% static 'assets/img/patients/patient-default.jpg' %}" alt="{{ patient.get_full_name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <h4 class="mt-3">{{ patient.get_full_name }}</h4>
+                                        <p class="text-muted">{{ patient.email }}</p>
+                                        <a href="{% url 'patients:profile-setting' %}" class="btn btn-primary btn-sm">Completar Perfil</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Buscar Doctores</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <form method="get" class="search-form">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <input type="text" name="q" class="form-control" placeholder="Nombre del doctor" value="{{ query }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <select name="specialization" class="form-control">
+                                                            <option value="">Todas las especialidades</option>
+                                                            {% for speciality in specializations %}
+                                                                {% if speciality %}
+                                                                <option value="{{ speciality }}" {% if specialization == speciality %}selected{% endif %}>{{ speciality }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="submit" class="btn btn-primary btn-block">
+                                                        <i class="fas fa-search"></i> Buscar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de Doctores -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Doctores Disponibles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for doctor in doctors %}
+                            <div class="col-md-4 col-lg-4 col-xl-4">
+                                <div class="card widget-profile pat-widget-profile">
+                                    <div class="card-body">
+                                        <div class="pro-widget-content">
+                                            <div class="profile-info-widget">
+                                                <a href="#" class="booking-doc-img">
+                                                    {% if doctor.profile.image %}
+                                                    <img src="{{ doctor.profile.image.url }}" alt="Doctor Image">
+                                                    {% else %}
+                                                    <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="Doctor Image">
+                                                    {% endif %}
+                                                </a>
+                                                <div class="profile-det-info">
+                                                    <h3><a href="#">Dr. {{ doctor.get_full_name }}</a></h3>
+                                                    <div class="patient-details">
+                                                        <h5><i class="fas fa-stethoscope"></i> {{ doctor.profile.specialization|default:"General" }}</h5>
+                                                        <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> {{ doctor.profile.address|default:"" }}</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="patient-info">
+                                            <ul>
+                                                <li>Precio: <span>{{ doctor.profile.price_per_consultation|floatformat:2 }} €</span></li>
+                                                {% if doctor.profile.experience %}
+                                                <li>Experiencia: <span>{{ doctor.profile.experience }} años</span></li>
+                                                {% endif %}
+                                                <li>
+                                                    <span class="d-flex justify-content-center">
+                                                        <a href="{% url 'patients:doctor-booking' doctor.pk patient.pk %}" class="btn btn-success">
+                                                            <i class="fas fa-calendar-check"></i> Agendar Cita
+                                                        </a>
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <p class="mb-0">No se encontraron doctores. Intente con otros criterios de búsqueda.</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paginación -->
+                {% if doctors.has_other_pages %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pagination justify-content-center">
+                            <ul class="pagination">
+                                {% if doctors.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ doctors.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if specialization %}&specialization={{ specialization }}{% endif %}">&laquo;</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for i in doctors.paginator.page_range %}
+                                    {% if doctors.number == i %}
+                                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                                    {% else %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}{% if specialization %}&specialization={{ specialization }}{% endif %}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if doctors.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ doctors.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if specialization %}&specialization={{ specialization }}{% endif %}">&raquo;</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

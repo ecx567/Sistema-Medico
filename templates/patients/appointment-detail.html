@@ -1,114 +1,178 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Appointment Details{% endblock %}
+{% block title %}Detalle de Cita{% endblock %}
 
 {% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'patients:dashboard' %}">Panel</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Detalle de Cita</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Detalle de Cita</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="content">
     <div class="container">
-        <div class="card">
-            <div class="card-body">
-                <div class="booking-doc-info">
-                    <a href="{% url 'doctors:doctor-profile' appointment.doctor.username %}" class="booking-doc-img">
-                        <img src="{{ appointment.doctor.profile.image }}" alt="Doctor Image">
-                    </a>
-                    <div class="booking-info">
-                        <h4><a href="{% url 'doctors:doctor-profile' appointment.doctor.username %}">Dr. {{ appointment.doctor.get_full_name }}</a></h4>
-                        <div class="clinic-details">
-                            <p class="doc-location">
-                                <i class="fas fa-map-marker-alt"></i> {{ appointment.doctor.profile.city }}, {{ appointment.doctor.profile.state }}
-                            </p>
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                <div class="profile-sidebar">
+                    <div class="widget-profile pro-widget-content">
+                        <div class="profile-info-widget">
+                            {% if appointment.doctor.profile.image %}
+                                <a href="#" class="booking-doc-img">
+                                    <img src="{{ appointment.doctor.profile.image.url }}" alt="Doctor">
+                                </a>
+                            {% else %}
+                                <a href="#" class="booking-doc-img">
+                                    <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="Doctor">
+                                </a>
+                            {% endif %}
+                            <div class="profile-det-info">
+                                <h3>Dr. {{ appointment.doctor.get_full_name }}</h3>
+                                <div class="patient-details">
+                                    <h5><i class="fas fa-user-md"></i> {{ appointment.doctor.profile.specialization }}</h5>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="booking-summary">
-                    <div class="booking-item-wrap">
-                        <ul class="booking-date">
-                            <li>Date <span>{{ appointment.appointment_date }}</span></li>
-                            <li>Time <span>{{ appointment.appointment_time|time:"h:i A" }}</span></li>
-                        </ul>
-                        <ul class="booking-fee">
-                            <li>Consulting Fee <span>৳{{ appointment.doctor.profile.price_per_consultation }}</span></li>
-                        </ul>
-                        <div class="booking-total">
-                            <ul class="booking-total-list">
+                    <div class="dashboard-widget">
+                        <div class="patient-info">
+                            <ul>
                                 <li>
-                                    <span>Status</span>
-                                    <span class="total-cost">
-                                        <span class="badge badge-pill 
-                                            {% if appointment.status == 'confirmed' %}bg-success-light{% endif %}
-                                            {% if appointment.status == 'pending' %}bg-warning-light{% endif %}
-                                            {% if appointment.status == 'cancelled' %}bg-danger-light{% endif %}
-                                            {% if appointment.status == 'completed' %}bg-info-light{% endif %}">
-                                            {{ appointment.status|title }}
-                                        </span>
-                                    </span>
+                                    <h6>Número de cita</h6>
+                                    <span>#CITA{{ appointment.id }}</span>
+                                </li>
+                                <li>
+                                    <h6>Estado</h6>
+                                    <span class="badge {{ appointment.status_badge }}">{{ appointment.get_status_display }}</span>
+                                </li>
+                                <li>
+                                    <h6>Fecha</h6>
+                                    <span>{{ appointment.appointment_date|date:"d/m/Y" }}</span>
+                                </li>
+                                <li>
+                                    <h6>Hora</h6>
+                                    <span>{{ appointment.appointment_time|time:"H:i" }}</span>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Información de Recordatorios -->
-                <div class="booking-reminder mt-4">
-                    <h5><i class="fas fa-bell"></i> Recordatorios</h5>
-                    {% if appointment.has_reminder %}
-                        {% for reminder in appointment.reminders.all %}
-                            <p>
-                                <span class="badge badge-pill {% if reminder.sent_to_patient %}bg-success-light{% else %}bg-danger-light{% endif %}">
-                                    Recordatorio enviado el {{ reminder.sent_at|date:"d/m/Y H:i" }}
-                                </span>
-                            </p>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted">Se enviará un recordatorio 24 horas antes de su cita.</p>
-                    {% endif %}
-                </div>
-                <!-- Fin Información de Recordatorios -->
-                
-                <div class="booking-actions text-right">
-                    {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
-                    <form method="post" action="{% url 'patients:appointment-cancel' appointment.pk %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                    </form>
-                    {% endif %}
-                    
-                    <a href="{% url 'patients:appointment-print' appointment.pk %}" target="_blank" class="btn btn-sm bg-info-light">
-                        <i class="fas fa-print"></i> Print
-                    </a>
-                    {% if appointment.status == 'completed' and not appointment.review %}
-                        <div class="card">
-                            <div class="card-body">
-                                <h4 class="card-title">Rate Your Experience</h4>
-                                <p>Share your experience with Dr. {{ appointment.doctor.get_full_name }}</p>
-                                <a href="{% url 'patients:add-review' appointment.id %}" class="btn btn-primary">
-                                    Write a Review
-                                </a>
-                            </div>
-                        </div>
-                    {% endif %}
+            </div>
+            <!-- /Sidebar -->
 
-                    {% if appointment.review %}
-                        <div class="card">
-                            <div class="card-body">
-                                <h4 class="card-title">Your Review</h4>
-                                <div class="rating">
-                                    {% for i in "12345"|make_list %}
-                                    <i class="fas fa-star {% if forloop.counter <= appointment.review.rating %}filled{% endif %}"></i>
-                                    {% endfor %}
+            <!-- Content -->
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Detalles de la Cita</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="appointment-details">
+                                    <h5>Motivo de consulta</h5>
+                                    <p>{{ appointment.reason|default:appointment.notes }}</p>
+                                    
+                                    {% if appointment.medical_conditions %}
+                                        <h5>Condiciones médicas</h5>
+                                        <p>{{ appointment.medical_conditions }}</p>
+                                    {% endif %}
+                                    
+                                    <h5>Tipo de consulta</h5>
+                                    <p>{{ appointment.get_consultation_type_display|default:"Consulta General" }}</p>
+                                    
+                                    {% if appointment.medical_history_file %}
+                                        <h5>Documentación adjunta</h5>
+                                        <p><a href="{{ appointment.medical_history_file.url }}" target="_blank" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-download"></i> Descargar archivo
+                                        </a></p>
+                                    {% endif %}
                                 </div>
-                                <p class="review-text">{{ appointment.review.review }}</p>
-                                <p class="review-date">Reviewed on {{ appointment.review.created_at|date }}</p>
                             </div>
                         </div>
-                    {% endif %} 
+                    </div>
+                </div>
+
+                <!-- Acciones de cita -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="appointment-action">
+                            <a href="{% url 'patients:appointment-print' appointment.id %}" class="btn btn-secondary" target="_blank">
+                                <i class="fas fa-print"></i> Imprimir
+                            </a>
+                            {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+                                <a href="{% url 'patients:appointment-cancel' appointment.id %}" class="btn btn-danger" 
+                                   onclick="return confirm('¿Está seguro que desea cancelar esta cita?');">
+                                    <i class="fas fa-times"></i> Cancelar Cita
+                                </a>
+                            {% endif %}
+                            
+                            {% if appointment.status == 'completed' and not has_review %}
+                                <a href="{% url 'patients:add-review' appointment.doctor.id %}" class="btn btn-info">
+                                    <i class="fas fa-star"></i> Dejar Valoración
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!-- /Content -->
         </div>
     </div>
 </div>
+
+<style>
+    .appointment-details h5 {
+        color: #272b41;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        margin-top: 20px;
+    }
+    .appointment-details p {
+        color: #757575;
+        font-size: 15px;
+        margin-bottom: 15px;
+    }
+    .appointment-action {
+        text-align: right;
+    }
+    .appointment-action .btn {
+        margin-left: 10px;
+        min-width: 140px;
+    }
+    .badge {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    .badge-success {
+        background-color: #28a745;
+        color: #fff;
+    }
+    .badge-danger {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    .badge-info {
+        background-color: #20c0f3;
+        color: #fff;
+    }
+</style>
 {% endblock %}

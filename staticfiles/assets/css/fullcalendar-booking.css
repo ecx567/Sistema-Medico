@@ -1,0 +1,291 @@
+/**
+ * Estilos personalizados para FullCalendar en el Sistema de Citas Médicas
+ */
+
+/* Variables de colores */
+:root {
+    --primary-color: #20c0f3;
+    --primary-light: #e3f2fd;
+    --primary-dark: #0daee3;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --danger-light: #ffebee;
+    --warning-color: #ffc107;
+    --text-dark: #272b41;
+    --border-color: #e6e6e6;
+    --bg-light: #f8f9fa;
+}
+
+/* Contenedor principal */
+.appointment-scheduling {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+/* Encabezado con filtros y leyenda */
+.scheduling-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Opciones de filtro */
+.filter-options {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-options .btn {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 20px;
+}
+
+.filter-options .btn.active {
+    font-weight: 600;
+}
+
+.filter-options .btn-outline-primary.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.filter-options .btn-outline-secondary.active {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+/* Leyenda del calendario */
+.legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-dark);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.legend-color.available {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-color);
+}
+
+.legend-color.unavailable {
+    background-color: var(--danger-light);
+    border: 1px solid var(--danger-color);
+}
+
+.legend-color.selected {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-dark);
+}
+
+/* Calendario FullCalendar */
+.appointment-calendar {
+    height: 480px;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 5px;
+}
+
+/* Personalización de FullCalendar */
+.fc .fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.fc .fc-button {
+    font-weight: 500;
+}
+
+.fc .fc-button-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+    background-color: var(--primary-light);
+}
+
+/* Estilos para los eventos del calendario */
+.calendar-event {
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.event-available {
+    background-color: var(--primary-light) !important;
+    border: 1px solid var(--primary-color) !important;
+    color: var(--primary-dark) !important;
+}
+
+.event-unavailable {
+    background-color: var(--danger-light) !important;
+    border: 1px solid var(--danger-color) !important;
+    color: var(--danger-color) !important;
+    opacity: 0.8;
+}
+
+/* Selección de horarios */
+.time-slot-selection {
+    margin-top: 25px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.time-slot-selection h5 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+}
+
+.time-slots-container {
+    min-height: 80px;
+}
+
+.time-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.time-slot-btn {
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-color);
+    color: var(--text-dark);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-slot-btn:hover {
+    background-color: #d0ebf6;
+    transform: translateY(-2px);
+}
+
+.time-slot-btn.selected {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.no-slots-message {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Resumen de cita */
+.appointment-summary {
+    margin-top: 25px;
+}
+
+.appointment-summary .card {
+    border-radius: 10px;
+    border-color: #e0f3ff;
+}
+
+.appointment-summary .card-title {
+    color: var(--primary-dark);
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.appointment-summary .card-body {
+    padding: 20px;
+}
+
+.appointment-summary strong {
+    color: var(--text-dark);
+}
+
+/* Botón de confirmación */
+.booking-btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(32, 192, 243, 0.2);
+    transition: all 0.3s;
+}
+
+.booking-btn:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(32, 192, 243, 0.3);
+}
+
+.booking-btn:disabled {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Campos ocultos */
+input[type="hidden"] {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .scheduling-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filter-options {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .filter-options .btn {
+        flex: 1;
+    }
+    
+    .legend {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .appointment-calendar {
+        height: 400px;
+    }
+}

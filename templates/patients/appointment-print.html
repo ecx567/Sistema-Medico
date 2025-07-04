@@ -1,67 +1,237 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Appointment Details - Print</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impresión de Cita - Sistema Médico</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .details { margin-bottom: 20px; }
-        .details table { width: 100%; border-collapse: collapse; }
-        .details td { padding: 8px; border: 1px solid #ddd; }
-        .footer { margin-top: 50px; text-align: center; }
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #272b41;
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 0;
+        }
+        .print-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #20c0f3;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #272b41;
+            margin-bottom: 10px;
+        }
+        .logo {
+            max-width: 180px;
+            margin-bottom: 15px;
+        }
+        .appointment-details {
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .section-title {
+            color: #20c0f3;
+            border-bottom: 1px solid #e6e6e6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            width: 200px;
+            font-weight: bold;
+            color: #272b41;
+        }
+        .detail-value {
+            flex: 1;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+        }
+        .status-pending {
+            background: #ffc107;
+        }
+        .status-confirmed {
+            background: #28a745;
+        }
+        .status-cancelled {
+            background: #dc3545;
+        }
+        .status-completed {
+            background: #20c0f3;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #757575;
+            border-top: 1px solid #e6e6e6;
+            padding-top: 20px;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-code img {
+            max-width: 150px;
+        }
+        .doctor-info {
+            margin-bottom: 20px;
+        }
+        .doctor-info img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+            float: left;
+        }
+        .patient-info {
+            margin-bottom: 20px;
+        }
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .print-container {
+                box-shadow: none;
+                padding: 20px;
+                max-width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+            @page {
+                margin: 0.5cm;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="print-container">
         <div class="header">
-            <h1>Appointment Details</h1>
-            <p>Booking Reference: #{{ appointment.pk }}</p>
+            <h1>Sistema de Gestión Médica</h1>
+            <p>Comprobante de Cita Médica</p>
         </div>
         
-        <div class="details">
-            <table>
-                <tr>
-                    <td><strong>Doctor:</strong></td>
-                    <td>Dr. {{ appointment.doctor.get_full_name }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Specialization:</strong></td>
-                    <td>{{ appointment.doctor.profile.specialization }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Patient:</strong></td>
-                    <td>{{ appointment.patient.get_full_name }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Appointment Date:</strong></td>
-                    <td>{{ appointment.appointment_date }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Appointment Time:</strong></td>
-                    <td>{{ appointment.appointment_time|time:"h:i A" }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Booking Date:</strong></td>
-                    <td>{{ appointment.booking_date }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Status:</strong></td>
-                    <td>{{ appointment.status|title }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Consultation Fee:</strong></td>
-                    <td>USD${{ appointment.doctor.profile.price_per_consultation }}</td>
-                </tr>
-            </table>
+        <div class="doctor-info section">
+            <h3 class="section-title">Información del Médico</h3>
+            <div class="detail-row">
+                <span class="detail-label">Médico:</span>
+                <span class="detail-value">Dr. {{ appointment.doctor.get_full_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Especialidad:</span>
+                <span class="detail-value">{{ appointment.doctor.profile.specialization }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Correo:</span>
+                <span class="detail-value">{{ appointment.doctor.email }}</span>
+            </div>
         </div>
-        
+
+        <div class="patient-info section">
+            <h3 class="section-title">Información del Paciente</h3>
+            <div class="detail-row">
+                <span class="detail-label">Paciente:</span>
+                <span class="detail-value">{{ appointment.patient.get_full_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">ID:</span>
+                <span class="detail-value">PAT-{{ appointment.patient.id }}</span>
+            </div>
+        </div>
+
+        <div class="appointment-details section">
+            <h3 class="section-title">Detalles de la Cita</h3>
+            <div class="detail-row">
+                <span class="detail-label">Número de Cita:</span>
+                <span class="detail-value">CITA-{{ appointment.id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Fecha:</span>
+                <span class="detail-value">{{ appointment.appointment_date }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Hora:</span>
+                <span class="detail-value">{{ appointment.appointment_time }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Tipo de Consulta:</span>
+                <span class="detail-value">{{ appointment.get_consultation_type_display|default:"Consulta General" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Estado:</span>
+                <span class="detail-value">
+                    <span class="status status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Motivo:</span>
+                <span class="detail-value">{{ appointment.reason|default:appointment.notes }}</span>
+            </div>
+            {% if appointment.medical_conditions %}
+            <div class="detail-row">
+                <span class="detail-label">Condiciones Médicas:</span>
+                <span class="detail-value">{{ appointment.medical_conditions }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Información de Pago</h3>
+            <div class="detail-row">
+                <span class="detail-label">Precio de Consulta:</span>
+                <span class="detail-value">{{ appointment.price|default:"50.00" }} €</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Estado del Pago:</span>
+                <span class="detail-value">Pagado</span>
+            </div>
+        </div>
+
         <div class="footer">
-            <p>This is a computer generated document.</p>
+            <p>Este documento es un comprobante de su cita médica. Por favor, preséntelo en recepción.</p>
+            <p>Sistema de Gestión Médica - {{ appointment.created_at|date:"Y"|default:2025 }} &copy; Todos los derechos reservados.</p>
+        </div>
+
+        <div class="no-print" style="text-align: center; margin-top: 30px;">
+            <button onclick="window.print();" style="padding: 10px 20px; background: #20c0f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Imprimir Comprobante
+            </button>
+            <button onclick="window.close();" style="padding: 10px 20px; margin-left: 10px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Cerrar
+            </button>
         </div>
     </div>
+
     <script>
-        window.onload = function() { window.print(); }
+        // Imprimir automáticamente al cargar
+        window.onload = function() {
+            // Esperar un momento para que los estilos se apliquen correctamente
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
     </script>
 </body>
-</html> 
+</html>

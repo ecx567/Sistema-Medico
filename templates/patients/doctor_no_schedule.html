@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Doctor sin Horario - {{ doctor.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Sin Horario</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Doctor sin Horario de Atención</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="error-box">
+                            <img src="{% static 'assets/img/icons/schedule-icon.png' %}" alt="Schedule Icon" class="img-fluid" style="max-width: 150px;">
+                            <h3 class="mb-3">Sin Horario de Atención</h3>
+                            <p class="h4 font-weight-normal">El Dr. {{ doctor.get_full_name }} no tiene horarios de atención configurados.</p>
+                            <p class="text-muted">No es posible agendar citas con este doctor hasta que configure sus horarios de atención.</p>
+                            
+                            {% if is_admin %}
+                            <div class="mt-4">
+                                <a href="{% url 'doctors:schedule-timings' %}?doctor={{ doctor.pk }}" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle"></i> Agregar Horario de Atención
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mt-4">
+                                <a href="{% url 'patients:after-register' patient.pk %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-left"></i> Volver a la Lista de Doctores
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

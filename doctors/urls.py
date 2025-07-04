@@ -18,6 +18,9 @@ from .views import (
     DoctorChangePasswordView,
     PrescriptionCreateView,
     PrescriptionDetailView,
+    after_register_doctor,
+    doctor_appointment_action,
+    AppointmentSuccessView,
 )
 
 app_name = "doctors"
@@ -25,7 +28,6 @@ app_name = "doctors"
 urlpatterns = [
     path("", DoctorsListView.as_view(), name="list"),
     path("dashboard/", DoctorDashboardView.as_view(), name="dashboard"),
-    path("schedule-timings/", schedule_timings, name="schedule-timings"),
     path(
         "profile-settings/",
         DoctorProfileUpdateView.as_view(),
@@ -51,6 +53,8 @@ urlpatterns = [
         UpdateRegistrationNumberAPIView.as_view(),
         name="update-registration-number",
     ),
+    #
+
     path(
         "update-specialization",
         UpdateSpecializationAPIView.as_view(),
@@ -93,4 +97,24 @@ urlpatterns = [
         name="prescription-detail",
     ),
     #path('add-doctor/', AddDoctorView.as_view(), name='add_doctor'),
+    path(
+        "schedule-timings/",
+        schedule_timings,  # Usar el schedule_timings importado directamente
+        name="schedule-timings",
+    ),
+    path(
+        "after-register/<int:pk>/",
+        after_register_doctor,
+        name="after-register",
+    ),
+    path(
+        "appointment-action/<int:appointment_id>/<str:action>/",
+        doctor_appointment_action,
+        name="appointment-quick-action",
+    ),
+    path(
+    "appointments/<int:booking_id>/success/",
+    AppointmentSuccessView.as_view(),
+    name="appointment-success",
+),
 ]

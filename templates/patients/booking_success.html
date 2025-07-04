@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cita Agendada con Éxito{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Cita Agendada</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Cita Agendada Exitosamente</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content success-page-cont">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card success-card">
+                    <div class="card-body">
+                        <div class="success-cont">
+                            <i class="fas fa-check"></i>
+                            <h3>¡Su cita ha sido agendada exitosamente!</h3>
+                            <p>Cita con <strong>Dr. {{ doctor.get_full_name }}</strong><br> el {{ booking.appointment_date|date:"d/m/Y" }} a las {{ booking.appointment_time|time:"H:i" }}</p>
+                            <div class="booking-details">
+                                <div class="booking-info">
+                                    <h4>Información de la Cita</h4>
+                                    <ul>
+                                        <li><span>Fecha:</span> {{ booking.appointment_date|date:"d/m/Y" }}</li>
+                                        <li><span>Hora:</span> {{ booking.appointment_time|time:"H:i" }}</li>
+                                        <li><span>Tipo:</span> {{ booking.get_consultation_type_display }}</li>
+                                        <li><span>Estado:</span> <span class="badge badge-pill bg-warning-light">Pendiente de Confirmación</span></li>
+                                    </ul>
+                                </div>
+                                <div class="payment-info">
+                                    <h4>Información del Pago</h4>
+                                    <ul>
+                                        <li><span>Costo:</span> {{ cost|floatformat:2 }} €</li>
+                                        <li><span>Estado del Pago:</span> <span class="badge badge-pill bg-success-light">Pagado</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="booking-note">
+                                <p><strong>Nota:</strong> Su cita está pendiente de confirmación por el doctor. Recibirá una notificación cuando sea confirmada.</p>
+                            </div>
+                            <div class="btn-group mt-4">
+                                <a href="{% url 'patients:dashboard' %}" class="btn btn-primary">
+                                    <i class="fas fa-home"></i> Ir al Panel
+                                </a>
+                                <a href="{% url 'patients:appointment-detail' booking.pk %}" class="btn btn-info">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                                <a href="{% url 'patients:appointment-print' booking.pk %}" class="btn btn-secondary" target="_blank">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cita Confirmada{% endblock %}
+
+{% block content %}
+<div class="content success-page-cont">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Success Card -->
+                <div class="card success-card">
+                    <div class="card-body">
+                        <div class="success-cont">
+                            <i class="fas fa-check"></i>
+                            <h3>¡Su cita ha sido agendada exitosamente!</h3>
+                            <h4>Cita con Dr. {{ appointment.doctor.get_full_name }}</h4>
+                            <p>el {{ appointment.appointment_date|date:"d/m/Y" }} a las {{ appointment.appointment_time|time:"H:i" }}</p>
+                            
+                            <div class="appointment-details mt-4">
+                                <h4 class="mb-3">Información de la Cita</h4>
+                                <ul class="info-details">
+                                    <li>
+                                        <div class="details-header">
+                                            <span>Fecha:</span>
+                                        </div>
+                                        <div class="details-text">
+                                            <span>{{ appointment.appointment_date|date:"d/m/Y" }}</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="details-header">
+                                            <span>Hora:</span>
+                                        </div>
+                                        <div class="details-text">
+                                            <span>{{ appointment.appointment_time|time:"H:i" }}</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="details-header">
+                                            <span>Tipo:</span>
+                                        </div>
+                                        <div class="details-text">
+                                            <span>Consulta {{ appointment.get_consultation_type_display|default:"General" }}</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="details-header">
+                                            <span>Estado:</span>
+                                        </div>
+                                        <div class="details-text">
+                                            <span class="badge {{ appointment.status_badge }}">{{ appointment.get_status_display }}</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="payment-info mt-4">
+                                <h4 class="mb-3">Información del Pago</h4>
+                                <ul class="info-details">
+                                    <li>
+                                        <div class="details-header">
+                                            <span>Costo:</span>
+                                        </div>
+                                        <div class="details-text">
+                                            <span>{{ appointment.price|default:"50.00" }} €</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="details-header">
+                                            <span>Estado del Pago:</span>
+                                        </div>
+                                        <div class="details-text">
+                                            <span class="text-success">Pagado</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="note mt-4">
+                                <p class="text-muted"><strong>Nota:</strong> Su cita está pendiente de confirmación por el doctor. Recibirá una notificación cuando sea confirmada.</p>
+                            </div>
+
+                            <div class="appointment-actions mt-4">
+                                <a href="{% url 'patients:dashboard' %}" class="btn btn-primary">
+                                    <i class="fas fa-home"></i> Ir al Panel
+                                </a>
+                                <a href="{% url 'patients:appointment-detail' appointment.id %}" class="btn btn-info">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                                <a href="{% url 'patients:appointment-print' appointment.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .success-page-cont {
+        margin: 40px 0;
+    }
+    .success-card {
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+    .success-cont {
+        text-align: center;
+        padding: 30px 15px;
+    }
+    .success-cont i {
+        font-size: 80px;
+        color: #28a745;
+        margin-bottom: 20px;
+        display: block;
+    }
+    .success-cont h3 {
+        color: #272b41;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    .success-cont h4 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: #20c0f3;
+    }
+    .info-details {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .info-details li {
+        display: flex;
+        padding: 10px 0;
+        border-bottom: 1px dashed #e6e6e6;
+    }
+    .details-header {
+        width: 30%;
+        text-align: left;
+        font-weight: 600;
+        color: #272b41;
+    }
+    .details-text {
+        width: 70%;
+        text-align: left;
+    }
+    .appointment-actions {
+        margin-top: 30px;
+    }
+    .appointment-actions .btn {
+        margin: 0 5px 10px;
+    }
+    .badge {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    .badge-success {
+        background-color: #28a745;
+        color: #fff;
+    }
+    .badge-danger {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    .badge-info {
+        background-color: #20c0f3;
+        color: #fff;
+    }
+</style>
+{% endblock %}
