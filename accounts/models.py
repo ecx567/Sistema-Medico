@@ -1,9 +1,9 @@
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.db import models
 from django.urls import reverse
 from django.db.models import Avg
-
+from django.utils.translation import gettext_lazy as _
 from accounts.managers import CustomUserManager
 from utils.file_utils import (
     profile_photo_directory_path,
@@ -82,37 +82,47 @@ class User(AbstractUser):
         return distribution
 
 
+
+
+
+
+
+
 class Profile(models.Model):
     """
     User profile
     """
 
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="profile"
-    )
-    avatar = models.ImageField(
-        default="defaults/user.png", upload_to=profile_photo_directory_path
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    avatar = models.ImageField(default="defaults/user.png", upload_to=profile_photo_directory_path)
+    # Agregar estos campos
+    image = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    bio = models.TextField(blank=True, null=True)
+    # Los demás campos ya existentes se mantienen igual
     phone = models.CharField(max_length=20, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     about = models.TextField(blank=True, null=True)
     specialization = models.CharField(max_length=255, blank=True, null=True)
-    gender = models.CharField(
-        max_length=10,
-        choices=[("male", "Male"), ("female", "Female"), ("other", "Other")],
-        blank=True,
-    )
+    gender = models.CharField(max_length=10,
+                              choices=
+                              [("male", "Male"), 
+                               ("female", "Female"), 
+                               ("other", "Other")],blank=True,)
+    # choices=[
+    #         ("M", "Masculino"), 
+    #         ("F", "Femenino"), 
+    #         ("O", "Otro")
+    #     ],
+    #     blank=True,
+    #     null=True
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=100, blank=True)
     postal_code = models.CharField(max_length=20, blank=True)
     country = models.CharField(max_length=100, blank=True)
-    price_per_consultation = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True
-    )
+    price_per_consultation = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     is_available = models.BooleanField(default=True)
-    blood_group = models.CharField(
-        max_length=5,
+    blood_group = models.CharField(max_length=5,
         choices=[
             ("A+", "A+"),
             ("A-", "A-"),
@@ -128,14 +138,30 @@ class Profile(models.Model):
     )
     allergies = models.TextField(blank=True, null=True)
     medical_conditions = models.TextField(blank=True, null=True)
+    experience = models.PositiveIntegerField(default=0) 
+
 
     def __str__(self):
         return "Profile of {}".format(self.user.username)
 
+    # @property
+    # def image(self):
+    #     return (
+    #         self.avatar.url
+    #         if self.avatar.storage.exists(self.avatar.name)
+    #         else "{}defaults/user.png".format(settings.MEDIA_URL)
+    #     )
+    @property
+    def image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return self.avatar.url if self.avatar else f"{settings.MEDIA_URL}defaults/user.png"
+
+    # Keep the old image property for backward compatibility
     @property
     def image(self):
         return (
             self.avatar.url
             if self.avatar.storage.exists(self.avatar.name)
-            else "{}defaults/user.png".format(settings.MEDIA_URL)
+            else f"{settings.MEDIA_URL}defaults/user.png"
         )

@@ -1,373 +1,458 @@
-{% extends 'includes/doctor-sidebar.html' %}
+{% extends 'base.html' %}
 {% load static %}
-{% load time_filters %}
 
-{% block css %}
+{% block title %}Configuración de Horarios{% endblock %}
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'assets/css/doctor.css' %}">
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Horarios</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Configuración de Horarios</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                <div class="profile-sidebar">
+                    <div class="widget-profile pro-widget-content">
+                        <div class="profile-info-widget">
+                            <a href="#" class="booking-doc-img">
+                                {% if request.user.profile.image %}
+                                <img src="{{ request.user.profile.image.url }}" alt="User Image">
+                                {% else %}
+                                <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="User Image">
+                                {% endif %}
+                            </a>
+                            <div class="profile-det-info">
+                                <h3>Dr. {{ request.user.get_full_name }}</h3>
+                                <div class="patient-details">
+                                    <h5 class="mb-0">{{ request.user.profile.specialization|default:"Sin especialidad" }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-widget">
+                        <nav class="dashboard-menu">
+                            <ul>
+                                <li>
+                                    <a href="{% url 'doctors:dashboard' %}">
+                                        <i class="fas fa-columns"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:appointments' %}">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span>Citas</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:my-patients' %}">
+                                        <i class="fas fa-user-injured"></i>
+                                        <span>Mis Pacientes</span>
+                                    </a>
+                                </li>
+                                <li class="active">
+                                    <a href="{% url 'doctors:schedule-timings' %}">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Horarios</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:profile-setting' %}">
+                                        <i class="fas fa-user-cog"></i>
+                                        <span>Perfil</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:change-password' %}">
+                                        <i class="fas fa-lock"></i>
+                                        <span>Cambiar Contraseña</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'accounts:logout' %}">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Cerrar Sesión</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <!-- /Sidebar -->
+            
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Horarios de Consulta</h4>
+                            </div>
+                            <div class="card-body">
+                                {% if messages %}
+                                <div class="alert alert-success">
+                                    {% for message in messages %}
+                                        {{ message }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <form method="post">
+                                    {% csrf_token %}
+                                    
+                                    <div class="row form-row">
+                                        <div class="col-12 col-md-12">
+                                            <div class="form-group">
+                                                <div class="schedule-header">
+                                                    <h4>Configura tus horarios de atención por día</h4>
+                                                    <p class="text-muted">Define las horas en que estarás disponible para recibir pacientes</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="hours-info">
+                                        <!-- Lunes -->
+                                        <div class="row form-row hours-cont">
+                                            <div class="col-12 col-md-10">
+                                                <div class="row form-row">
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Lunes</label>
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input type="checkbox" class="custom-control-input" name="monday_enabled" id="monday_enabled" {% if monday %}checked{% endif %}>
+                                                                <label class="custom-control-label" for="monday_enabled">Disponible</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-12">
+                                                <div class="monday-slots" {% if not monday %}style="display: none"{% endif %}>
+                                                    {% if monday and monday.time_range.all %}
+                                                        {% for range in monday.time_range.all %}
+                                                            <div class="row form-row hours-cont">
+                                                                <div class="col-12 col-md-10">
+                                                                    <div class="row form-row">
+                                                                        <div class="col-12 col-md-5">
+                                                                            <div class="form-group">
+                                                                                <label>Desde</label>
+                                                                                <input type="time" class="form-control" name="monday_start_{{ forloop.counter0 }}" value="{{ range.start_time|time:'H:i' }}">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12 col-md-5">
+                                                                            <div class="form-group">
+                                                                                <label>Hasta</label>
+                                                                                <input type="time" class="form-control" name="monday_end_{{ forloop.counter0 }}" value="{{ range.end_time|time:'H:i' }}">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-2">
+                                                                    <div class="form-group">
+                                                                        <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                                                                        <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                        <input type="hidden" name="monday_slots" value="{{ monday.time_range.all|length }}">
+                                                    {% else %}
+                                                        <div class="row form-row hours-cont">
+                                                            <div class="col-12 col-md-10">
+                                                                <div class="row form-row">
+                                                                    <div class="col-12 col-md-5">
+                                                                        <div class="form-group">
+                                                                            <label>Desde</label>
+                                                                            <input type="time" class="form-control" name="monday_start_0" value="09:00">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-5">
+                                                                        <div class="form-group">
+                                                                            <label>Hasta</label>
+                                                                            <input type="time" class="form-control" name="monday_end_0" value="17:00">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                                                                    <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="monday_slots" value="1">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="add-more mb-3">
+                                                    <a href="javascript:void(0);" class="add-hours" data-day="monday"><i class="fa fa-plus-circle"></i> Añadir Horario</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /Lunes -->
+                                        
+                                        <!-- Martes -->
+                                        <div class="row form-row hours-cont">
+                                            <div class="col-12 col-md-10">
+                                                <div class="row form-row">
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Martes</label>
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input type="checkbox" class="custom-control-input" name="tuesday_enabled" id="tuesday_enabled" {% if tuesday %}checked{% endif %}>
+                                                                <label class="custom-control-label" for="tuesday_enabled">Disponible</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-12">
+                                                <div class="tuesday-slots" {% if not tuesday %}style="display: none"{% endif %}>
+                                                    {% if tuesday and tuesday.time_range.all %}
+                                                        {% for range in tuesday.time_range.all %}
+                                                            <div class="row form-row hours-cont">
+                                                                <div class="col-12 col-md-10">
+                                                                    <div class="row form-row">
+                                                                        <div class="col-12 col-md-5">
+                                                                            <div class="form-group">
+                                                                                <label>Desde</label>
+                                                                                <input type="time" class="form-control" name="tuesday_start_{{ forloop.counter0 }}" value="{{ range.start_time|time:'H:i' }}">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12 col-md-5">
+                                                                            <div class="form-group">
+                                                                                <label>Hasta</label>
+                                                                                <input type="time" class="form-control" name="tuesday_end_{{ forloop.counter0 }}" value="{{ range.end_time|time:'H:i' }}">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-2">
+                                                                    <div class="form-group">
+                                                                        <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                                                                        <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                        <input type="hidden" name="tuesday_slots" value="{{ tuesday.time_range.all|length }}">
+                                                    {% else %}
+                                                        <div class="row form-row hours-cont">
+                                                            <div class="col-12 col-md-10">
+                                                                <div class="row form-row">
+                                                                    <div class="col-12 col-md-5">
+                                                                        <div class="form-group">
+                                                                            <label>Desde</label>
+                                                                            <input type="time" class="form-control" name="tuesday_start_0" value="09:00">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-5">
+                                                                        <div class="form-group">
+                                                                            <label>Hasta</label>
+                                                                            <input type="time" class="form-control" name="tuesday_end_0" value="17:00">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                                                                    <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="tuesday_slots" value="1">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="add-more mb-3">
+                                                    <a href="javascript:void(0);" class="add-hours" data-day="tuesday"><i class="fa fa-plus-circle"></i> Añadir Horario</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /Martes -->
+
+                                        <!-- Miércoles -->
+                                        <div class="row form-row hours-cont">
+                                            <div class="col-12 col-md-10">
+                                                <div class="row form-row">
+                                                    <div class="col-12 col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Miércoles</label>
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input type="checkbox" class="custom-control-input" name="wednesday_enabled" id="wednesday_enabled" {% if wednesday %}checked{% endif %}>
+                                                                <label class="custom-control-label" for="wednesday_enabled">Disponible</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-12">
+                                                <div class="wednesday-slots" {% if not wednesday %}style="display: none"{% endif %}>
+                                                    {% if wednesday and wednesday.time_range.all %}
+                                                        {% for range in wednesday.time_range.all %}
+                                                            <div class="row form-row hours-cont">
+                                                                <div class="col-12 col-md-10">
+                                                                    <div class="row form-row">
+                                                                        <div class="col-12 col-md-5">
+                                                                            <div class="form-group">
+                                                                                <label>Desde</label>
+                                                                                <input type="time" class="form-control" name="wednesday_start_{{ forloop.counter0 }}" value="{{ range.start_time|time:'H:i' }}">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-12 col-md-5">
+                                                                            <div class="form-group">
+                                                                                <label>Hasta</label>
+                                                                                <input type="time" class="form-control" name="wednesday_end_{{ forloop.counter0 }}" value="{{ range.end_time|time:'H:i' }}">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-2">
+                                                                    <div class="form-group">
+                                                                        <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                                                                        <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                        <input type="hidden" name="wednesday_slots" value="{{ wednesday.time_range.all|length }}">
+                                                    {% else %}
+                                                        <div class="row form-row hours-cont">
+                                                            <div class="col-12 col-md-10">
+                                                                <div class="row form-row">
+                                                                    <div class="col-12 col-md-5">
+                                                                        <div class="form-group">
+                                                                            <label>Desde</label>
+                                                                            <input type="time" class="form-control" name="wednesday_start_0" value="09:00">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-5">
+                                                                        <div class="form-group">
+                                                                            <label>Hasta</label>
+                                                                            <input type="time" class="form-control" name="wednesday_end_0" value="17:00">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                                                                    <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="wednesday_slots" value="1">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="add-more mb-3">
+                                                    <a href="javascript:void(0);" class="add-hours" data-day="wednesday"><i class="fa fa-plus-circle"></i> Añadir Horario</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /Miércoles -->
+
+                                        <!-- Resto de días de la semana siguiendo el mismo patrón -->
+                                        
+                                        <div class="submit-section text-center">
+                                            <button type="submit" class="btn btn-primary submit-btn">Guardar Cambios</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
 {% block scripts %}
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
-    <script src="{% static 'assets/js/doctor.js' %}"></script>
-    <script>
-        $(document).on("focusin", ".timepicker", function () {
-            $('input.timepicker').timepicker({});
+<script>
+    $(document).ready(function() {
+        // Manejar la visibilidad de los slots según el estado del checkbox
+        $('input[type="checkbox"][name$="_enabled"]').change(function() {
+            const day = $(this).attr('name').replace('_enabled', '');
+            const slotsContainer = $(`.${day}-slots`);
+            
+            if ($(this).is(':checked')) {
+                slotsContainer.show();
+            } else {
+                slotsContainer.hide();
+            }
         });
-    </script>
-
-{% endblock %}
-
-{% block main %}
-
-    <div class="row">
-        <div class="col-md-8">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Set Appointments Schedule</h3>
-                </div>
-
-                <div class="box-body">
-                    <form method="post" class="validate-form" action="" role="form">
-
-                        {% csrf_token %}
-
-                        <div class="row main_item">
-
-                            <div class="item-rows w-100 mb-20">
-
-                                <div class="form-group col-md-12 mb-0">
-                                    <div class="custom-control custom-switch pt-10">
-                                        <input type="checkbox" value="1" name="day_0" class="custom-control-input day_option" id="switch-1" checked="">
-                                        <label class="custom-control-label" for="switch-1">Sunday</label>
-                                    </div>
+        
+        // Añadir más horarios
+        $('.add-hours').on('click', function(e) {
+            e.preventDefault();
+            const day = $(this).data('day');
+            const container = $(`.${day}-slots`);
+            const count = parseInt($(`input[name="${day}_slots"]`).val());
+            
+            const html = `
+                <div class="row form-row hours-cont">
+                    <div class="col-12 col-md-10">
+                        <div class="row form-row">
+                            <div class="col-12 col-md-5">
+                                <div class="form-group">
+                                    <label>Desde</label>
+                                    <input type="time" class="form-control" name="${day}_start_${count}" value="09:00">
                                 </div>
-
-                                {% for time in user.sunday.time_range.all %}
-
-                                    <div class="hour-item col-md-12 hideable_1" id="row_48">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_0" value="{{ time.start|time_12hr }}" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_0" value="{{ time.end|time_12hr }}" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="48" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-
-                                {% endfor %}
-
-                                <div class="houritem_0 col-md-12">
-                                </div>
-
-                                <div class="form-group col-sm-12 mt-2 hideable_1" style="display: block;">
-                                    <a href="#" data-id="0" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                                </div>
-
-                                <div class="day_highliter"></div>
-                                <div class="day_divider"></div>
                             </div>
-
-
-                            <div class="item-rows w-100 mb-20">
-
-                                <div class="form-group col-md-12 mb-0">
-                                    <div class="custom-control custom-switch pt-10">
-                                        <input type="checkbox" value="2" name="day_1" class="custom-control-input day_option" id="switch-2" checked="">
-                                        <label class="custom-control-label" for="switch-2">Monday</label>
-                                    </div>
+                            <div class="col-12 col-md-5">
+                                <div class="form-group">
+                                    <label>Hasta</label>
+                                    <input type="time" class="form-control" name="${day}_end_${count}" value="17:00">
                                 </div>
-
-                                {% for time in user.monday.time_range.all %}
-                                    <div class="hour-item col-md-12 hideable_2" id="row_52">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_1" value="{{ time.start|time_12hr }}" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_1" value="{{ time.end|time_12hr }}" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="52" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-
-                                <div class="houritem_1 col-md-12"></div>
-
-                                <div class="form-group col-sm-12 mt-2 hideable_2" style="display: block;">
-                                    <a href="#" data-id="1" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                                </div>
-
-                                <div class="day_highliter"></div>
-                                <div class="day_divider"></div>
                             </div>
-
-
-                            <div class="item-rows w-100 mb-20">
-
-                                <div class="form-group col-md-12 mb-0">
-                                    <div class="custom-control custom-switch pt-10">
-                                        <input type="checkbox" value="3" name="day_2" class="custom-control-input day_option" id="switch-3" checked="">
-                                        <label class="custom-control-label" for="switch-3">Tuesday</label>
-                                    </div>
-                                </div>
-
-                                {% for time in user.tuesday.time_range.all %}
-                                    <div class="hour-item col-md-12 hideable_3" id="row_54">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_2" value="01:30 AM" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_2" value="02:30 AM" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="54" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-
-                                <div class="houritem_2 col-md-12"></div>
-
-                                <div class="form-group col-sm-12 mt-2 hideable_3" style="display: block;">
-                                    <a href="#" data-id="2" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                                </div>
-
-                                <div class="day_highliter"></div>
-                                <div class="day_divider"></div>
-                            </div>
-
-
-                            <div class="item-rows w-100 mb-20">
-
-                                <div class="form-group col-md-12 mb-0">
-                                    <div class="custom-control custom-switch pt-10">
-                                        <input type="checkbox" value="4" name="day_3" class="custom-control-input day_option" id="switch-4" checked="">
-                                        <label class="custom-control-label" for="switch-4">Wednesday</label>
-                                    </div>
-                                </div>
-
-                                {% for time in user.wednesday.time_range.all %}
-                                    <div class="hour-item col-md-12 hideable_4" id="row_57">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_3" value="01:30 AM" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_3" value="03:00 AM" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="57" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-
-                                <div class="houritem_3 col-md-12"></div>
-
-                                <div class="form-group col-sm-12 mt-2 hideable_4" style="display: block;">
-                                    <a href="#" data-id="3" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                                </div>
-
-                                <div class="day_highliter"></div>
-                                <div class="day_divider"></div>
-                            </div>
-
-
-                            <div class="item-rows w-100 mb-20">
-
-                                <div class="form-group col-md-12 mb-0">
-                                    <div class="custom-control custom-switch pt-10">
-                                        <input type="checkbox" value="5" name="day_4" class="custom-control-input day_option" id="switch-5" checked="">
-                                        <label class="custom-control-label" for="switch-5">Thursday</label>
-                                    </div>
-                                </div>
-
-                                {% for time in user.thursday.time_range.all %}
-                                    <div class="hour-item col-md-12 hideable_5" id="row_59">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_4" value="02:00 AM" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_4" value="04:00 AM" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="59" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-
-                                <div class="houritem_4 col-md-12"></div>
-
-                                <div class="form-group col-sm-12 mt-2 hideable_5" style="display: block;">
-                                    <a href="#" data-id="4" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                                </div>
-
-                                <div class="day_highliter"></div>
-                                <div class="day_divider"></div>
-                            </div>
-
-
-                            <div class="item-rows w-100 mb-20">
-
-                                <div class="form-group col-md-12 mb-0">
-                                    <div class="custom-control custom-switch pt-10">
-                                        <input type="checkbox" value="6" name="day_5" class="custom-control-input day_option" id="switch-6" checked aria-invalid="false">
-                                        <label class="custom-control-label" for="switch-6">Friday</label>
-                                    </div>
-                                </div>
-
-                                 {% for time in user.friday.time_range.all %}
-                                    <div class="hour-item col-md-12 hideable_5" id="row_52">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_1" value="{{ time.start|time_12hr }}" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_1" value="{{ time.end|time_12hr }}" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="52" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-
-                                <div class="houritem_5 col-md-12"></div>
-
-                                <div class="form-group col-sm-12 mt-2 hideable_6">
-                                    <a href="#" data-id="5" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                                </div>
-
-                                <div class="day_highliter"></div>
-                                <div class="day_divider"></div>
-                            </div>
-
                         </div>
-
-                        <div class="item-rows w-100 mb-20">
-
-                            <div class="form-group col-md-12 mb-0">
-                                <div class="custom-control custom-switch pt-10">
-                                    <input type="checkbox" value="7" name="day_6" class="custom-control-input day_option" id="switch-7" checked="">
-                                    <label class="custom-control-label" for="switch-7">Saturday</label>
-                                </div>
-                            </div>
-
-                            {% for time in user.saturday.time_range.all %}
-                                    <div class="hour-item col-md-12 hideable_7" id="row_52">
-                                        <div class="row">
-                                            <div class="col-sm-5 pr-0 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="start_time_1" value="{{ time.start|time_12hr }}" placeholder="Start time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-5 mb-2">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fa fa-clock"></i></span>
-                                                    </div>
-                                                    <input type="text" class="form-control timepicker" name="end_time_1" value="{{ time.end|time_12hr }}" placeholder="End time" autocomplete="off">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-2 mb-2 mt-2"><a data-id="52" href="" class="del_time_row delete_item text-danger"><i class="fa fa-trash"></i></a></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-
-                            <div class="houritem_6 col-md-12"></div>
-
-                            <div class="form-group col-sm-12 mt-2 hideable_7" style="display: block;">
-                                <a href="#" data-id="6" class="add_time_row"><i class="fa fa-plus-circle"></i> Add new time</a>
-                            </div>
-
-                            <div class="day_highliter"></div>
-                            <div class="day_divider"></div>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <div class="form-group">
+                            <label class="d-md-block d-sm-none d-none">&nbsp;</label>
+                            <a href="javascript:void(0);" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a>
                         </div>
-
-                        <button type="submit" class="btn btn-primary"><i class="ficon flaticon-check"></i> Update</button>
-                    </form>
+                    </div>
                 </div>
-
-            </div>
-        </div>
-    </div>
-
+            `;
+            
+            container.append(html);
+            $(`input[name="${day}_slots"]`).val(count + 1);
+        });
+        
+        // Eliminar horario
+        $(document).on('click', '.trash', function(e) {
+            e.preventDefault();
+            $(this).closest('.hours-cont').remove();
+            
+            // Actualizar contador de slots
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            days.forEach(day => {
+                const count = $(`.${day}-slots .hours-cont`).length;
+                $(`input[name="${day}_slots"]`).val(count);
+            });
+        });
+    });
+</script>
 {% endblock %}

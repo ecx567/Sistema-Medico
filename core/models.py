@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+import uuid
 
 
 class Speciality(models.Model):
@@ -72,3 +73,16 @@ class Review(models.Model):
     @property
     def rating_percent(self):
         return (self.rating / 5) * 100
+    
+class TimeRange(models.Model):
+    """Modelo para rangos de tiempo utilizados en horarios de doctores"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    start = models.TimeField()
+    end = models.TimeField()
+    
+    class Meta:
+        verbose_name = "Rango de tiempo"
+        verbose_name_plural = "Rangos de tiempo"
+    
+    def __str__(self):
+        return f"{self.start.strftime('%H:%M')} - {self.end.strftime('%H:%M')}"

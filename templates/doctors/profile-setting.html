@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuración de Perfil{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-12 col-12">
+                <nav aria-label="breadcrumb" class="page-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Perfil</li>
+                    </ol>
+                </nav>
+                <h2 class="breadcrumb-title">Configuración de Perfil</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+                <div class="profile-sidebar">
+                    <div class="widget-profile pro-widget-content">
+                        <div class="profile-info-widget">
+                            <a href="#" class="booking-doc-img">
+                                {% if request.user.profile.image %}
+                                <img src="{{ request.user.profile.image.url }}" alt="User Image">
+                                {% else %}
+                                <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="User Image">
+                                {% endif %}
+                            </a>
+                            <div class="profile-det-info">
+                                <h3>Dr. {{ request.user.get_full_name }}</h3>
+                                <div class="patient-details">
+                                    <h5 class="mb-0">{{ request.user.profile.specialization|default:"Sin especialidad" }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-widget">
+                        <nav class="dashboard-menu">
+                            <ul>
+                                <li>
+                                    <a href="{% url 'doctors:dashboard' %}">
+                                        <i class="fas fa-columns"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:appointments' %}">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span>Citas</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:my-patients' %}">
+                                        <i class="fas fa-user-injured"></i>
+                                        <span>Mis Pacientes</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:schedule-timings' %}">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Horarios</span>
+                                    </a>
+                                </li>
+                                <li class="active">
+                                    <a href="{% url 'doctors:profile-setting' %}">
+                                        <i class="fas fa-user-cog"></i>
+                                        <span>Perfil</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'doctors:change-password' %}">
+                                        <i class="fas fa-lock"></i>
+                                        <span>Cambiar Contraseña</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'accounts:logout' %}">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Cerrar Sesión</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <!-- /Sidebar -->
+            
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Formulario de perfil -->
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Información básica -->
+                            <div class="row form-row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <div class="change-avatar">
+                                            <div class="profile-img">
+                                                {% if request.user.profile.image %}
+                                                <img src="{{ request.user.profile.image.url }}" alt="User Image">
+                                                {% else %}
+                                                <img src="{% static 'assets/img/doctors/doctor-default.jpg' %}" alt="User Image">
+                                                {% endif %}
+                                            </div>
+                                            <div class="upload-img">
+                                                <div class="change-photo-btn">
+                                                    <span><i class="fa fa-upload"></i> Subir Foto</span>
+                                                    <input type="file" class="upload" name="avatar">
+                                                </div>
+                                                <small class="form-text text-muted">Formatos permitidos: JPG, GIF o PNG. Tamaño máximo 2MB</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Nombre</label>
+                                        <input type="text" class="form-control" name="first_name" value="{{ request.user.first_name }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Apellido</label>
+                                        <input type="text" class="form-control" name="last_name" value="{{ request.user.last_name }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Fecha de Nacimiento</label>
+                                        <input type="date" class="form-control" name="dob" value="{{ form.instance.dob|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Género</label>
+                                        <select class="form-control" name="gender">
+                                            <option value="M" {% if form.instance.gender == 'M' %}selected{% endif %}>Masculino</option>
+                                            <option value="F" {% if form.instance.gender == 'F' %}selected{% endif %}>Femenino</option>
+                                            <option value="O" {% if form.instance.gender == 'O' %}selected{% endif %}>Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Datos de contacto -->
+                            <div class="row form-row">
+                                <div class="col-12">
+                                    <h4 class="card-title">Datos de Contacto</h4>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" value="{{ request.user.email }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Teléfono</label>
+                                        <input type="text" class="form-control" name="phone" value="{{ form.instance.phone }}">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Dirección</label>
+                                        <input type="text" class="form-control" name="address" value="{{ form.instance.address }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Ciudad</label>
+                                        <input type="text" class="form-control" name="city" value="{{ form.instance.city }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Estado/Provincia</label>
+                                        <input type="text" class="form-control" name="state" value="{{ form.instance.state }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Código Postal</label>
+                                        <input type="text" class="form-control" name="postal_code" value="{{ form.instance.postal_code }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>País</label>
+                                        <input type="text" class="form-control" name="country" value="{{ form.instance.country }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Información profesional -->
+                            <div class="row form-row">
+                                <div class="col-12">
+                                    <h4 class="card-title">Información Profesional</h4>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Especialidades</label>
+                                        <select class="form-control select2" name="specializations" multiple>
+                                            {% for speciality in specialities %}
+                                                <option value="{{ speciality.name }}" 
+                                                {% if speciality.name in doctor_specialities %}selected{% endif %}>
+                                                    {{ speciality.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label>Precio por Consulta</label>
+                                        <input type="text" class="form-control" name="price_per_consultation" value="{{ form.instance.price_per_consultation }}">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Biografía</label>
+                                        <textarea class="form-control" name="bio" rows="5">{{ form.instance.bio }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="submit-section">
+                                <button type="submit" class="btn btn-primary submit-btn">Guardar Cambios</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Inicializar Select2 para mejorar la experiencia de selección
+        if($.fn.select2) {
+            $('.select2').select2({
+                placeholder: "Selecciona especialidades",
+                allowClear: true,
+                tags: true
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -103,6 +103,14 @@ class BookingView(LoginRequiredMixin, View):
 
         # Get week dates
         week_dates = self.get_week_dates()
+        schedule = {}
+        for date_info in week_dates:
+            date_ = datetime.strptime(date_info["full_date"], "%Y-%m-%d").date()
+            schedule[date_info["full_date"]] = self.get_available_slots(
+                doctor, date_
+            )
+        
+        
 
         # Get available slots for each day
         schedule = {}

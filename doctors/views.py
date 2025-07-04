@@ -1,7 +1,6 @@
+import sys
 import json
 from datetime import datetime
-
-
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin 
@@ -12,7 +11,7 @@ from django.http import (
     HttpResponsePermanentRedirect,
 )
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.views.generic import (
     ListView,
@@ -32,7 +31,7 @@ from django.contrib.auth import update_session_auth_hash
 
 from bookings.models import Booking, Prescription
 from core.decorators import user_is_doctor
-from doctors.forms import DoctorProfileForm, PrescriptionForm
+from doctors.forms import DoctorProfileForm, PrescriptionForm, DoctorPasswordChangeForm
 from doctors.models import Experience
 from doctors.models.general import *
 from doctors.serializers import (
@@ -44,12 +43,16 @@ from doctors.serializers import (
 from mixins.custom_mixins import DoctorRequiredMixin
 from patients.forms import ChangePasswordForm
 from utils.htmx import render_toast_message_for_api
-from accounts.models import User
+from accounts.models import User, Profile
 from bookings.models import Booking
 
 # Importar el modelo de Feedback
 from feedback.models import Feedback
 from django.db.models import Avg, Count, Q
+
+from core.models import Speciality, TimeRange
+from doctors.models import Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+
 
 days = {
     0: Sunday,
@@ -68,6 +71,9 @@ class DoctorDashboardView(DoctorRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = timezone.now().date()
+
+         # Obtener citas del doctor
+        bookings = Booking.objects.filter(doctor=doctor)
 
         # Get appointment counts
         context["total_patients"] = (
@@ -143,15 +149,63 @@ def schedule_timings(request: HttpRequest) -> HttpResponse:
     return render(request, "doctors/schedule-timings.html")
 
 
-class DoctorProfileUpdateView(DoctorRequiredMixin, generic.UpdateView):
-    model = User
-    template_name = "doctors/profile-settings.html"
+# class DoctorProfileUpdateView(DoctorRequiredMixin, generic.UpdateView):
+#     model = User
+#     template_name = "doctors/profile-settings.html"
+#     form_class = DoctorProfileForm
+
+#     def get_object(self, queryset=None):
+#         return self.request.user
+
+class DoctorProfileUpdateView(DoctorRequiredMixin, UpdateView):
+    """Vista para actualizar el perfil del doctor"""
+    model = Profile
     form_class = DoctorProfileForm
-
+    template_name = "doctors/profile-setting.html"
+    
     def get_object(self, queryset=None):
-        return self.request.user
+        doctor_id = self.kwargs.get('doctor_id')
+        if self.request.user.is_staff and doctor_id:
+            user = get_object_or_404(User, id=doctor_id, role='doctor')
+            return user.profile
+        return self.request.user.profile
 
+    def get_success_url(self):
+        doctor_id = self.kwargs.get('doctor_id')
+        if self.request.user.is_staff and doctor_id:
+            return reverse_lazy('doctors:after-register', kwargs={'pk': doctor_id})
+        return reverse_lazy("doctors:profile-setting")
 
+    def form_valid(self, form):
+        profile = form.save(commit=False)
+        user = profile.user
+        
+        user.first_name = self.request.POST.get('first_name', user.first_name)
+        user.last_name = self.request.POST.get('last_name', user.last_name)
+        
+        if self.request.FILES.get('avatar'):
+            profile.image = self.request.FILES['avatar']
+        
+        specializations = self.request.POST.getlist('specializations')
+        if specializations:
+            profile.specialization = ", ".join(specializations)
+        
+        user.save()
+        profile.save()
+        
+        messages.success(self.request, "Perfil actualizado correctamente")
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.get_object().user
+        context['specialities'] = Speciality.objects.all()
+        if self.object.specialization:
+            context['doctor_specialities'] = [s.strip() for s in self.object.specialization.split(',')]
+        else:
+            context['doctor_specialities'] = []
+        return context
+    
 class DoctorProfileView(DetailView):
     context_object_name = "doctor"
     model = User
@@ -728,14 +782,12 @@ def after_register_doctor(request, pk):
         doc.pending_appointments = Booking.objects.filter(doctor=doc, status='pending').count()
         # Contar citas completadas
         doc.completed_appointments = Booking.objects.filter(doctor=doc, status='completed').count()
-
-        #  # Contar citas por estado
-        # doc.citas_pendientes = Booking.objects.filter(doctor=doc, status='pending').count()
-        # doc.citas_completadas = Booking.objects.filter(doctor=doc, status='completed').count()
-        # doc.citas_count = Booking.objects.filter(doctor=doc).count()
-
-    # Filtrar citas pendientes para el doctor recién registrado
-    pending_appointments = Booking.objects.filter(doctor=doctor,status='pending').select_related('patient', 'patient__profile')
+    
+    # Obtener citas pendientes para este doctor
+    pending_appointments = Booking.objects.filter(
+        doctor=doctor,
+        status='pending'
+    ).select_related('patient', 'patient__profile')
     
     return render(request, 'doctors/after_register.html', {
         'doctor': doctor,
@@ -743,6 +795,37 @@ def after_register_doctor(request, pk):
         'pending_appointments': pending_appointments,
         'is_admin': request.user.is_staff,
     })
+
+# @login_required
+# def doctor_appointment_action(request, appointment_id, action):
+#     """Acción sobre una cita (aceptar/rechazar/completar)"""
+#     if request.method != 'POST':
+#         return redirect('doctors:dashboard')
+    
+#     appointment = get_object_or_404(
+#         Booking,
+#         id=appointment_id,
+#         doctor=request.user
+#     )
+    
+#     if action == 'accept':
+#         appointment.status = 'confirmed'
+#         messages.success(request, 'Cita confirmada correctamente')
+#     elif action == 'reject':
+#         appointment.status = 'cancelled'
+#         messages.success(request, 'Cita rechazada correctamente')
+#     elif action == 'complete':
+#         appointment.status = 'completed'
+#         messages.success(request, 'Cita marcada como completada correctamente')
+    
+#     appointment.save()
+
+#     # Redireccionar a la página actual (after-register o dashboard)
+#     referer = request.META.get('HTTP_REFERER')
+#     if referer:
+#         return redirect(referer)
+    
+#     return redirect('doctors:dashboard')
 
 @login_required
 def doctor_appointment_action(request, appointment_id, action):
@@ -775,7 +858,6 @@ def doctor_appointment_action(request, appointment_id, action):
     
     return redirect('doctors:dashboard')
 
-
 # Agregar esta vista para la página de éxito de cita
 class AppointmentSuccessView(LoginRequiredMixin, DetailView):
     model = Booking
@@ -787,3 +869,80 @@ class AppointmentSuccessView(LoginRequiredMixin, DetailView):
         return Booking.objects.select_related(
             "doctor", "doctor__profile", "patient", "patient__profile"
         ).filter(patient=self.request.user)
+
+
+
+####
+
+# Añadir esta clase a las vistas existentes
+
+# Añadir esta clase a las vistas existentes
+
+class ScheduleTimingsView(DoctorRequiredMixin, TemplateView):
+    """Vista para gestionar los horarios del doctor"""
+    template_name = "doctors/schedule-timings.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener el doctor actual
+        doctor = self.request.user
+        
+        # Obtener configuración de días de la semana
+        context["monday"] = doctor.monday if hasattr(doctor, 'monday') else None
+        context["tuesday"] = doctor.tuesday if hasattr(doctor, 'tuesday') else None
+        context["wednesday"] = doctor.wednesday if hasattr(doctor, 'wednesday') else None
+        context["thursday"] = doctor.thursday if hasattr(doctor, 'thursday') else None
+        context["friday"] = doctor.friday if hasattr(doctor, 'friday') else None
+        context["saturday"] = doctor.saturday if hasattr(doctor, 'saturday') else None
+        context["sunday"] = doctor.sunday if hasattr(doctor, 'sunday') else None
+        
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        # Procesar la actualización de horarios
+        days_list = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        days_models = [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+        days_dict = dict(zip(days_list, days_models))
+        
+        for day_name in days_list:
+            day_enabled = request.POST.get(f"{day_name}_enabled") == "on"
+            day_model_class = days_dict[day_name]
+            
+            # Obtener o crear el modelo para este día
+            try:
+                day_model = getattr(request.user, day_name)
+            except:
+                day_model = None
+            
+            if day_enabled:
+                if not day_model:
+                    # Crear el modelo si no existe
+                    day_model = day_model_class.objects.create(user=request.user)
+                    setattr(request.user, day_name, day_model)
+                
+                # Limpiar rangos de tiempo existentes
+                if hasattr(day_model, 'time_range'):
+                    day_model.time_range.all().delete()
+                
+                # Obtener rangos de tiempo para este día
+                slots = int(request.POST.get(f"{day_name}_slots", 0))
+                
+                for i in range(slots):
+                    start_time = request.POST.get(f"{day_name}_start_{i}")
+                    end_time = request.POST.get(f"{day_name}_end_{i}")
+                    
+                    if start_time and end_time:
+                        time_range = TimeRange.objects.create(
+                            start=start_time,
+                            end=end_time
+                        )
+                        day_model.time_range.add(time_range)
+            else:
+                # Si el día está deshabilitado y existe el modelo, eliminar sus rangos
+                if day_model and hasattr(day_model, 'time_range'):
+                    day_model.time_range.all().delete()
+        
+        messages.success(request, "Horarios actualizados correctamente")
+        return redirect("doctors:schedule-timings")
+

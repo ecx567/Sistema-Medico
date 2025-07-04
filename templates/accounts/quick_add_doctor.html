@@ -17,8 +17,11 @@
                                     <h3 class="card-title text-center">{% trans "Agregar Nuevo Doctor" %}</h3>
                                     <p class="text-center text-muted">Complete el formulario para registrar rápidamente un nuevo doctor</p>
                                     
-                                    <form method="post">
+                                    <!-- Modificado: Añadido action para asegurar la URL correcta -->
+                                    <form method="post" action="{% url 'accounts:quick-add-doctor' %}">
                                         {% csrf_token %}
+                                        <!-- Campo oculto para indicar redirección a doctors:after-register -->
+                                        <input type="hidden" name="redirect_to" value="doctors:after-register">
                                         
                                         {% if form.non_field_errors %}
                                         <div class="alert alert-danger">

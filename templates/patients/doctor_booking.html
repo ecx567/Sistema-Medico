@@ -1,32 +1,182 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Agendar Cita con Dr. {{ doctor.get_full_name }}{% endblock %}
+{% block title %}Agendar Cita - Dr. {{ doctor.get_full_name }}{% endblock %}
 
 {% block styles %}
-<!-- FullCalendar CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
-<link rel="stylesheet" href="{% static 'assets/css/fullcalendar-booking.css' %}">
 <style>
-    /* Estilos adicionales para garantizar visualización horizontal */
-    .fc .fc-timegrid-axis-frame, .fc .fc-timegrid-slot-label-frame {
-        justify-content: center;
+    /* Estilos para el selector de fecha */
+    .date-selector {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
     }
-    .fc .fc-col-header-cell {
+    .date-selector .date-nav {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+    }
+    .date-selector .date-nav .btn {
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #333;
+        margin: 0 5px;
+        transition: all 0.3s;
+    }
+    .date-selector .date-nav .btn:hover {
+        background: #f8f9fa;
+    }
+    .date-selector .date-display {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    /* Estilos para el selector de vista */
+    .view-selector {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+    }
+    .view-selector .btn {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        margin-left: 5px;
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+    }
+    .view-selector .btn.active {
+        background: #20c0f3;
+        color: #fff;
+        border-color: #20c0f3;
+    }
+
+    /* Estilos para la leyenda */
+    .schedule-legend {
+        display: flex;
+        margin-bottom: 15px;
+    }
+    .schedule-legend .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+        font-size: 14px;
+    }
+    .schedule-legend .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+        margin-right: 5px;
+    }
+    .legend-color.available {
+        background-color: #e9f7fe;
+    }
+    .legend-color.not-available {
+        background-color: #f5f5f5;
+    }
+    .legend-color.selected {
+        background-color: #20c0f3;
+    }
+
+    /* Estilos para la sección de días */
+    .day-slot {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+    .date-item {
+        cursor: pointer;
+        min-width: 80px;
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    }
+    .date-item:hover {
         background-color: #f8f9fa;
     }
-    .fc .fc-timegrid-slot-minor {
-        border-top-style: none !important;
+    .date-item.selected {
+        background-color: #20c0f3;
+        color: #fff;
+        border-color: #20c0f3;
     }
-    .time-slots-table tr {
+    .date-item .day-name {
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .date-item .date-number {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 5px 0;
+    }
+    .date-item .month-name {
+        font-size: 12px;
+    }
+
+    /* Estilos para los horarios */
+    .time-slot ul {
+        list-style: none;
+        padding-left: 0;
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        justify-content: flex-start;
     }
-    .time-slots-table td {
-        min-width: 100px;
+    .time-slot li {
         margin-bottom: 10px;
+    }
+    .time-slot a.timing {
+        background-color: #e9f7fe;
+        border: 1px solid #e9f7fe;
+        border-radius: 4px;
+        color: #20c0f3;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 12px;
+        text-align: center;
+    }
+    .time-slot a.timing.selected {
+        background-color: #20c0f3;
+        color: #fff;
+    }
+    .time-slot a.timing:hover {
+        background-color: #20c0f3;
+        color: #fff;
+    }
+
+    /* Estilos para la card de información */
+    .info-message {
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #20c0f3;
+    }
+
+    /* Estilos para la tabla de horarios */
+    .schedule-table-responsive {
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+    #schedule-table th, #schedule-table td {
+        vertical-align: middle;
+        min-width: 90px;
+        text-align: center;
+    }
+    .select-slot.selected, .select-slot:active {
+        background: #20c0f3 !important;
+        color: #fff !important;
+        border-color: #20c0f3 !important;
+    }
+    .select-slot {
+        margin: 2px 0;
+        min-width: 70px;
     }
 </style>
 {% endblock %}
@@ -39,11 +189,11 @@
                 <nav aria-label="breadcrumb" class="page-breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'patients:after-register' patient.pk %}">Doctores</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'doctors:list' %}">Doctores</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Agendar Cita</li>
                     </ol>
                 </nav>
-                <h2 class="breadcrumb-title">Agendar Cita</h2>
+                <h2 class="breadcrumb-title">Agendar Cita con Dr. {{ doctor.get_full_name }}</h2>
             </div>
         </div>
     </div>
@@ -85,10 +235,74 @@
                     </div>
                 </div>
 
-                <!-- Booking Form -->
+                <!-- Horario tipo tabla -->
                 <div class="card">
                     <div class="card-header bg-white">
-                        <h4 class="card-title mb-0">Agendar Cita</h4>
+                        <h4 class="card-title mb-0">Seleccione fecha y hora</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="schedule-legend mb-3">
+                            <div class="legend-item">
+                                <div class="legend-color available"></div>
+                                <span>Disponible</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color not-available"></div>
+                                <span>No disponible</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color selected"></div>
+                                <span>Seleccionado</span>
+                            </div>
+                        </div>
+                        <div class="schedule-table-responsive">
+                            <table class="table table-bordered text-center" id="schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hora</th>
+                                        {% for date in week_dates %}
+                                        <th>
+                                            <div>{{ date|date:"D" }}</div>
+                                            <div>{{ date|date:"d/m" }}</div>
+                                        </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for hour in hours %}
+                                    <tr>
+                                        <td><strong>{{ hour }}</strong></td>
+                                        {% for date in week_dates %}
+                                        <td>
+                                            {% with date_str=date|date:"Y-m-d" %}
+                                                {% if available_slots.date_str %}
+                                                    {% if hour in available_slots.date_str %}
+                                                        <button type="button" class="btn btn-outline-primary btn-sm select-slot" data-date="{{ date_str }}" data-time="{{ hour }}">
+                                                            {{ hour }}
+                                                        </button>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="date" id="selected_date">
+                        <input type="hidden" name="time" id="selected_time">
+                    </div>
+                </div>
+
+                <!-- Formulario de Reserva -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h4 class="card-title mb-0">Información de la Cita</h4>
                     </div>
                     <div class="card-body">
                         <form method="post" enctype="multipart/form-data" id="booking-form">
@@ -119,7 +333,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>{{ form.medical_conditions.label }}</label>
@@ -135,109 +348,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="row mt-4">
-                                <div class="col-12">
-                                    <h4 class="mb-4">
-                                        <i class="fas fa-calendar-alt text-primary mr-2"></i>
-                                        Seleccione fecha y hora
-                                    </h4>
-                                </div>
-                            </div>
-                            
-                            <!-- Contenedor del Calendario con FullCalendar -->
-                            <div class="appointment-scheduling">
-                                <!-- Barra de herramientas del calendario -->
-                                <div class="calendar-toolbar mb-3">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-7 mb-3 mb-md-0">
-                                            <div class="calendar-navigation">
-                                                <button type="button" id="prev-btn" class="btn btn-sm btn-outline-secondary">
-                                                    <i class="fas fa-chevron-left"></i>
-                                                </button>
-                                                <button type="button" id="today-btn" class="btn btn-sm btn-outline-primary mx-2">
-                                                    Hoy
-                                                </button>
-                                                <button type="button" id="next-btn" class="btn btn-sm btn-outline-secondary">
-                                                    <i class="fas fa-chevron-right"></i>
-                                                </button>
-                                                <h3 id="calendar-title" class="calendar-title ml-3 mb-0"></h3>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-5">
-                                            <div class="calendar-views text-md-right">
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" id="month-view" class="btn btn-sm btn-primary">Mes</button>
-                                                    <button type="button" id="week-view" class="btn btn-sm btn-outline-primary">Semana</button>
-                                                    <button type="button" id="day-view" class="btn btn-sm btn-outline-primary">Día</button>
-                                                    <button type="button" id="list-view" class="btn btn-sm btn-outline-primary">Lista</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Filtros y leyenda -->
-                                <div class="scheduling-header mb-3">
-                                    <div class="filter-options">
-                                        <button type="button" id="show-all-slots" class="btn btn-sm btn-outline-secondary active">
-                                            <i class="fas fa-calendar-alt"></i> Todos los horarios
-                                        </button>
-                                        <button type="button" id="show-available-slots" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-check-circle"></i> Solo disponibles
-                                        </button>
-                                    </div>
-                                    <div class="legend">
-                                        <div class="legend-item">
-                                            <span class="legend-color available"></span>
-                                            <span>Disponible</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <span class="legend-color unavailable"></span>
-                                            <span>No disponible</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <span class="legend-color selected"></span>
-                                            <span>Seleccionado</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Calendario FullCalendar -->
-                                <div id="appointment-calendar" class="appointment-calendar"></div>
-                                
-                                <!-- Selección de horario -->
-                                <div class="time-slot-selection mt-4">
-                                    <h5>Horarios disponibles para <span id="selected-date">ninguna fecha seleccionada</span></h5>
-                                    <div id="time-slots-container" class="time-slots-container">
-                                        <div class="no-slots-message">Seleccione una fecha en el calendario para ver los horarios disponibles</div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Resumen de la cita -->
-                                <div class="appointment-summary mt-4" id="appointment-summary" style="display: none;">
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <h5 class="card-title"><i class="fas fa-calendar-check text-success"></i> Resumen de su cita</h5>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <p><strong>Fecha:</strong> <span id="summary-date"></span></p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <p><strong>Hora:</strong> <span id="summary-time"></span></p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Campos ocultos para el formulario -->
-                            {{ form.date }}
-                            {{ form.time }}
-
                             <div class="submit-section text-center mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg booking-btn" disabled id="submit-booking">
+                                <button type="submit" class="btn btn-primary btn-lg submit-btn" disabled id="submit-booking">
                                     <i class="fas fa-calendar-check"></i> Confirmar Cita
                                 </button>
                             </div>
@@ -251,17 +363,19 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
-<script src="{% static 'assets/js/fullcalendar-booking.js' %}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Datos de disponibilidad desde el backend
-        const availableSlots = {{ available_slots|safe }};
-        
-        // Inicializar FullCalendar con los datos de disponibilidad
-        initAppointmentCalendar(availableSlots);
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.select-slot').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.select-slot.selected').forEach(function(b) {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            document.getElementById('selected_date').value = btn.dataset.date;
+            document.getElementById('selected_time').value = btn.dataset.time;
+            document.getElementById('submit-booking').disabled = false;
+        });
     });
+});
 </script>
 {% endblock %}

@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (
     DoctorDashboardView,
-    schedule_timings,
+    ScheduleTimingsView,
     DoctorProfileUpdateView,
     DoctorProfileView,
     UpdateEducationAPIView,
@@ -32,6 +32,11 @@ urlpatterns = [
         "profile-settings/",
         DoctorProfileUpdateView.as_view(),
         name="profile-setting",
+    ),
+    path(
+        "profile-settings/<int:doctor_id>/",
+        DoctorProfileUpdateView.as_view(),
+        name="profile-setting-admin",
     ),
     path(
         "<str:username>/profile/",
@@ -99,8 +104,13 @@ urlpatterns = [
     #path('add-doctor/', AddDoctorView.as_view(), name='add_doctor'),
     path(
         "schedule-timings/",
-        schedule_timings,  # Usar el schedule_timings importado directamente
+        ScheduleTimingsView.as_view(),
         name="schedule-timings",
+    ),
+    path(
+        "schedule-timings/<int:doctor_id>/",
+        ScheduleTimingsView.as_view(),
+        name="schedule-timings-admin"
     ),
     path(
         "after-register/<int:pk>/",
@@ -113,8 +123,8 @@ urlpatterns = [
         name="appointment-quick-action",
     ),
     path(
-    "appointments/<int:booking_id>/success/",
-    AppointmentSuccessView.as_view(),
-    name="appointment-success",
-),
+        "appointment-success/<int:booking_id>/",
+        AppointmentSuccessView.as_view(),
+        name="appointment-success",
+    ),
 ]

@@ -3,7 +3,7 @@ import json
 from datetime import datetime, date, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import View, ListView, DetailView, UpdateView, TemplateView, CreateView
+from django.views.generic import View, ListView, DetailView, UpdateView, TemplateView, CreateView, FormView
 from django.urls import reverse_lazy, reverse
 from django.views.generic.base import TemplateView
 from django.contrib import messages
@@ -23,6 +23,11 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from accounts.models import User, Profile
 from bookings.models import Booking
+from doctors.models.general import TimeRange 
+from accounts.models import User
+from patients.forms import BookingForm
+from doctors.models.general import TimeRange, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+
 # Eliminar esta línea que causa el problema
 # from bookings.forms import BookingForm
 from doctors.models.general import TimeRange, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
@@ -36,7 +41,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Importar el modelo de Feedback
 from feedback.models import Feedback
-
 
 class PatientDashboardView(PatientRequiredMixin, TemplateView):
     template_name = "patients/dashboard.html"
@@ -634,12 +638,41 @@ def after_register_patient(request, pk):
 #     })
 
 
+
 @login_required
 def doctor_booking(request, doctor_pk, patient_pk):
     """Vista para agendar cita con un doctor"""
     doctor = get_object_or_404(User, pk=doctor_pk, role='doctor')
     patient = get_object_or_404(User, pk=patient_pk, role='patient')
     
+    # Verificar si el doctor tiene horarios configurados
+    has_schedule = False
+    days_models = [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+    
+    for day_model in days_models:
+        if hasattr(doctor, day_model.__name__.lower()):
+            day_instance = getattr(doctor, day_model.__name__.lower())
+            if day_instance and day_instance.time_range.exists():
+                has_schedule = True
+                break
+    
+    if not has_schedule:
+        return render(request, 'patients/doctor_no_schedule.html', {
+            'doctor': doctor,
+            'patient': patient,
+            'is_admin': request.user.is_staff,
+        })
+    
+    # Fecha seleccionada (hoy por defecto)
+    selected_date = date.today()
+    
+    # Generar fechas para el selector de semana (7 días)
+    week_dates = [selected_date + timedelta(days=i) for i in range(7)] 
+    
+    # Reutilizamos la lógica de BookingView para obtener slots disponibles
+    booking_view = BookingView()
+    available_slots = booking_view.get_available_slots(doctor, selected_date)
+
     if request.method == 'POST':
         form = BookingForm(request.POST, request.FILES)
         if form.is_valid():
@@ -696,86 +729,130 @@ def doctor_booking(request, doctor_pk, patient_pk):
     else:
         form = BookingForm()
 
-    # Obtener horarios disponibles
-    available_slots = get_available_slots(doctor)
-    
     return render(request, 'patients/doctor_booking.html', {
         'doctor': doctor,
         'patient': patient,
         'form': form,
         'available_slots': available_slots,
+        'selected_date': selected_date,
+        'week_dates': week_dates,
         'is_admin': request.user.is_staff
     })
 
-
-
-def get_available_slots(doctor):
-    """Obtiene los slots disponibles para un doctor"""
-    # Obtener todos los horarios del doctor
-    days_models = [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
-    available_slots = {}
+class BookingView(TemplateView):
+    template_name = "patients/doctor_booking.html"
     
-    # Obtener citas existentes para este doctor
-    today = date.today()
-    end_date = today + timedelta(days=30)  # Mostrar disponibilidad para los próximos 30 días
-    
-    existing_bookings = Booking.objects.filter(
-        doctor=doctor,
-        appointment_date__gte=today,
-        appointment_date__lte=end_date,
-        status__in=['pending', 'confirmed']
-    ).values_list('appointment_date', 'appointment_time')
-    
-    # Convertir a set para búsqueda rápida
-    booked_slots = {(booking_date.strftime('%Y-%m-%d'), booking_time.strftime('%H:%M:%S')) for booking_date, booking_time in existing_bookings}
-    
-    # Para cada día en el rango de 30 días
-    current_date = today
-    while current_date <= end_date:
-        day_name = current_date.strftime('%A')  # Nombre del día en inglés (Monday, Tuesday, etc)
-        day_model = next((model for model in days_models if model.__name__ == day_name), None)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         
-        if day_model and hasattr(doctor, day_model.__name__.lower()):
-            day_instance = getattr(doctor, day_model.__name__.lower())
+        speciality_id = self.kwargs.get("speciality_id")
+        doctor_id = self.kwargs.get("doctor_id")
+        
+        doctor = get_object_or_404(User, pk=doctor_id, role="doctor")
+        speciality = get_object_or_404(Speciality, pk=speciality_id)
+        
+        # Fecha seleccionada (hoy por defecto)
+        selected_date = datetime.date.today()
+        
+        # Obtener horarios disponibles
+        available_slots = self.get_available_slots(doctor, selected_date)
+        
+        # Formulario de reserva
+        form = BookingForm()
+        
+        context.update({
+            "doctor": doctor,
+            "speciality": speciality,
+            "selected_date": selected_date,
+            "available_slots": available_slots,
+            "form": form,
+        })
+        
+        return context
+    
+    def get_available_slots(self, doctor, date):
+        """Devuelve los horarios disponibles para un doctor en una fecha específica."""
+        day_of_week = date.weekday()
+        
+        # Mapeo de número de día a nombre del modelo de horario
+        day_models = {
+            0: "monday", 1: "tuesday", 2: "wednesday", 3: "thursday",
+            4: "friday", 5: "saturday", 6: "sunday"
+        }
+        day_model_name = day_models.get(day_of_week)
+        
+        if not day_model_name or not hasattr(doctor, day_model_name):
+            return []
+        
+        schedule_day = getattr(doctor, day_model_name)
+        if not schedule_day:
+            return []
+        
+        time_ranges = schedule_day.time_range.all().order_by('start')
+        
+        # Obtener citas ya agendadas para ese día
+        booked_slots = Booking.objects.filter(
+            doctor=doctor, appointment_date=date
+        ).values_list('appointment_time', flat=True)
+        
+        available_slots = []
+        for time_range in time_ranges:
+            start_time = datetime.datetime.combine(date, time_range.start)
+            end_time = datetime.datetime.combine(date, time_range.end)
             
-            if day_instance and day_instance.time_range.exists():
-                slots_for_day = []
+            current_time = start_time
+            while current_time < end_time:
+                slot_time = current_time.time()
+                if slot_time not in booked_slots:
+                    available_slots.append(slot_time.strftime("%I:%M %p"))
+                current_time += datetime.timedelta(hours=1)
                 
-                for time_range in day_instance.time_range.all():
-                    # Usar los atributos start y end (no start_time, end_time)
-                    start_time = datetime.combine(today, time_range.start)
-                    end_time = datetime.combine(today, time_range.end)
-                    
-                    # Generar slots de 30 minutos
-                    current_slot = start_time
-                    while current_slot < end_time:
-                        slot_time = current_slot.time()
-                        slot_time_str = slot_time.strftime('%H:%M:%S')
-                        current_date_str = current_date.strftime('%Y-%m-%d')
-
-                        # Verificar si este slot ya está reservado
-                        if (current_date_str, slot_time_str) not in booked_slots:
-                            slots_for_day.append({
-                                'time': slot_time.strftime('%H:%M'),
-                                'timestamp': slot_time_str
-                            })
-                        
-                        # Avanzar 30 minutos
-                        current_slot += timedelta(minutes=30)
-                
-                if slots_for_day:
-                    date_str = current_date.strftime('%Y-%m-%d')
-                    available_slots[date_str] = {
-                        'date_display': current_date.strftime('%d/%m/%Y'),
-                        'day_name': day_name,
-                        'slots': slots_for_day
-                    }
-        
-        # Avanzar al siguiente día
-        current_date += timedelta(days=1)
+        return available_slots
     
-    return available_slots
+    def post(self, request, *args, **kwargs):
+        form = BookingForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.patient = request.user
+            booking.doctor_id = self.kwargs.get("doctor_id")
+            booking.speciality_id = self.kwargs.get("speciality_id")
+            
+            # Convertir fecha y hora de texto a objetos
+            date_str = request.POST.get('date')
+            time_str = request.POST.get('time')
+            
+            booking.appointment_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+            
+            # Convertir hora de formato "HH:MM AM/PM" a objeto time
+            time_format = '%I:%M %p'
+            booking.appointment_time = datetime.datetime.strptime(time_str, time_format).time()
+            
+            booking.save()
+            
+            # Redireccionar a página de confirmación
+            return redirect('patients:booking-success', booking_id=booking.id)
+            
+        # Si hay errores, volver a mostrar el formulario
+        context = self.get_context_data(**kwargs)
+        context['form'] = form
+        return render(request, self.template_name, context)
 
+
+@login_required
+def get_available_slots_for_date(request, doctor_id, date_str):
+    """Vista para la petición AJAX que devuelve los horarios disponibles."""
+    try:
+        date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        doctor = get_object_or_404(User, pk=doctor_id, role="doctor")
+        
+        # Reutilizamos la lógica de BookingView
+        view = BookingView()
+        slots = view.get_available_slots(doctor, date)
+        
+        return JsonResponse({"available_slots": slots})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 @login_required
 def get_available_slots_api(request, doctor_pk):
@@ -783,3 +860,43 @@ def get_available_slots_api(request, doctor_pk):
     doctor = get_object_or_404(User, pk=doctor_pk, role='doctor')
     slots = get_available_slots(doctor)
     return JsonResponse(slots)
+
+@login_required
+def after_register_patient(request, pk):
+    """Vista que se muestra después de registrar un paciente"""
+    # Primero intentamos obtener cualquier usuario (doctor o paciente)
+    user = get_object_or_404(User, pk=pk)
+    
+    # Si el usuario es un doctor, redirigir a la vista de doctores
+    if user.role == 'doctor':
+        return redirect('doctors:after-register', pk=pk)
+    
+    # Si es un paciente, continuamos con el código existente
+    patient = user
+    
+    # Búsqueda de doctores
+    query = request.GET.get('q', '')
+    specialization = request.GET.get('specialization', '')
+    
+    doctors = User.objects.filter(role='doctor').select_related('profile')
+    
+    if query:
+        doctors = doctors.filter(
+            Q(first_name__icontains=query) | 
+            Q(last_name__icontains=query) | 
+            Q(profile__specialization__icontains=query)
+        )
+
+    if specialization:
+        doctors = doctors.filter(profile__specialization__icontains=specialization)
+    
+    # Obtener especialidades para el filtro
+    specialities = Speciality.objects.all()
+    
+    return render(request, 'patients/after_register.html', {
+        'patient': patient,
+        'doctors': doctors,
+        'query': query,
+        'specialization': specialization,
+        'specialities': specialities,
+    })

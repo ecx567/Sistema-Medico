@@ -14,7 +14,10 @@ from .views import (
     after_register_patient,
     doctor_booking,
     get_available_slots_api,
-    AppointmentSuccessView 
+    AppointmentSuccessView ,
+    get_available_slots_for_date,
+    BookingView,
+
 )
 # Importar el módulo medical_records correctamente
 #from .views import medical_records
@@ -117,6 +120,11 @@ urlpatterns = [
     # API endpoints
     path('api/doctor/<int:doctor_pk>/slots/', get_available_slots_api, name='get-available-slots'),
 
+    # URL para la página de reserva
+    path('doctor-booking/<int:speciality_id>/<int:doctor_id>/', BookingView.as_view(), name='doctor-booking'),
+
+    # URL para la petición AJAX de los horarios
+    path('get-available-slots/<int:doctor_id>/<str:date_str>/', get_available_slots_for_date, name='get-available-slots'),
 
     # URLs para historial médico
     #path('medical-record/', medical_records.my_medical_record, name='my_medical_record'),
